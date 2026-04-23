@@ -649,10 +649,10 @@ async function toggleDefuseMode(bombId, currentlyOn) {
 
 async function resetAll() {
     try {
-        // 全爆弾をinactiveに
         for (const b of bombs) {
             await sbUpdate('bombs', { id: b.id }, { status: 'inactive', end_time: null });
             await sbUpsert('game_state', { key: `defuse_mode_${b.id}`, value: 'false', updated_at: new Date().toISOString() });
+            await sbUpsert('game_state', { key: `defuse_step2_${b.id}`, value: 'false', updated_at: new Date().toISOString() });
         }
         addLog('全データ初期化完了', 'warn');
         await loadAll();
