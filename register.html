@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会員情報入力 | バクダン介助 - 株式会社DETONATION</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ヘッダー（index.htmlと同じスタイル） -->
+    <section style="background: var(--background); padding: 2rem 0; border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div class="logo" style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="logo-icon.png" alt="バクダン解除アイコン" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <div>
+                        <h1 style="font-family: var(--font-display); font-weight: bold; font-size: clamp(1.8rem, 4vw, 2.2rem); margin: 0;">
+                            <a href="index.html" style="text-decoration: none; color: inherit;">
+                                <span style="color: #5fb85f;">バクダン</span><span style="color: #4a90a4;">解除</span>
+                            </a>
+                        </h1>
+                        <p class="tagline" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.2rem 0 0 0;">プロフェッショナルサービス</p>
+                    </div>
+                </div>
+                <nav style="display: flex; align-items: center; gap: 2rem;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">会員登録</span>
+                </nav>
+            </div>
+        </div>
+    </section>
+
+    <div style="min-height: calc(100vh - 100px); background: var(--background-section); padding: 2rem; display: flex; align-items: flex-start; justify-content: center;">
+        <div style="max-width: 800px; width: 100%;">
+            <!-- パスワード確認画面（非表示状態） -->
+            <div id="password-confirmation" style="display: none; text-align: center; padding: 3rem 2rem; border: 3px solid var(--danger-red); border-radius: var(--radius-lg); background: var(--background); box-shadow: 0 4px 30px var(--shadow); margin-bottom: 2rem;">
+                <h2 style="color: var(--danger-red); margin-bottom: 2rem; font-size: var(--font-size-3xl);">⚠️ パスワード確認 ⚠️</h2>
+                
+                <div style="background: var(--background-section); padding: 2rem; border-radius: var(--radius-md); border: 2px dashed var(--primary-color); margin: 2rem 0;">
+                    <p style="font-size: var(--font-size-lg); margin-bottom: 1rem; color: var(--text-primary);">パスワードは</p>
+                    <div id="password-display" style="font-size: clamp(2rem, 8vw, 4rem); font-weight: bold; color: var(--primary-color); font-family: var(--font-mono); margin: 1rem 0; word-break: break-all; line-height: 1.2;"></div>
+                    <p style="font-size: var(--font-size-lg); margin-top: 1rem; color: var(--text-primary);">です。よろしいですか？</p>
+                </div>
+                
+                <div style="display: flex; gap: 2rem; justify-content: center; margin-top: 2rem;">
+                    <button type="button" id="password-yes" style="font-size: var(--font-size-xl); padding: 1rem 3rem; min-width: 150px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: var(--text-light); border: none; border-radius: var(--radius-md); cursor: pointer;">
+                        はい
+                    </button>
+                    <button type="button" id="password-no" style="font-size: var(--font-size-xl); padding: 1rem 3rem; min-width: 150px; background: var(--danger-red); color: var(--text-light); border: none; border-radius: var(--radius-md); cursor: pointer;">
+                        いいえ
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 通常のフォーム -->
+            <div id="registration-form">
+            <div style="text-align: center; margin-bottom: 2rem; background: var(--background); padding: 2rem; border-radius: var(--radius-lg); box-shadow: 0 4px 30px var(--shadow);">
+                <h2 style="color: var(--text-primary); font-size: var(--font-size-3xl); margin-bottom: 1rem;">会員情報入力</h2>
+                <p style="color: var(--text-secondary); font-size: var(--font-size-base); margin-bottom: 1rem;">
+                    サービスご利用のため、以下の情報を入力してください。<br>
+                    <small>※入力いただいた情報は厳重に管理いたします。</small>
+                </p>
+                <!-- 別端末からのログイン時のスキップリンク -->
+                <div id="skip-registration" style="display:none; margin-top:1rem; padding:1rem; background:var(--background-section); border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                    <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0.5rem;">別の端末からのアクセスですか？</p>
+                    <a href="javascript:void(0)" id="skip-link" style="color:var(--primary-color); font-weight:600; text-decoration:none;">
+                        会員情報入力をスキップしてダッシュボードへ →
+                    </a>
+                </div>
+            </div>
+                
+                <form id="register-form" onsubmit="return false;" style="background: var(--background); border-radius: var(--radius-lg); box-shadow: 0 4px 30px var(--shadow); padding: 2.5rem;">
+                    <!-- 基本情報 -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">基本情報</h4>
+                        
+                        <div class="form-group">
+                            <label for="fullName">氏名 *</label>
+                            <input type="text" id="fullName" name="fullName" required placeholder="山田太郎">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="birthDate">生年月日 *</label>
+                            <input type="date" id="birthDate" name="birthDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gender">性別 *</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">選択してください</option>
+                                <option value="male">男性</option>
+                                <option value="female">女性</option>
+                                <option value="other">その他</option>
+                                <option value="no-answer">回答しない</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 連絡先情報 -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">連絡先情報</h4>
+                        
+                        <div class="form-group">
+                            <label for="phone">電話番号 *</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="090-1234-5678">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">住所 *</label>
+                            <textarea id="address" name="address" required rows="3" placeholder="〒123-4567 東京都..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 個人詳細情報 -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">個人詳細情報</h4>
+                        
+                        <div class="form-group">
+                            <label for="favoriteFood">好きな食べ物 *</label>
+                            <input type="text" id="favoriteFood" name="favoriteFood" required placeholder="例：ラーメン">
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="vision-grid">
+                            <div class="form-group">
+                                <label for="visionLeft">視力（左） *</label>
+                                <input type="number" id="visionLeft" name="visionLeft" required step="0.1" min="0" max="3" placeholder="1.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="visionRight">視力（右） *</label>
+                                <input type="number" id="visionRight" name="visionRight" required step="0.1" min="0" max="3" placeholder="1.0">
+                            </div>
+                        </div>
+                        
+                        <!-- モバイル用CSS -->
+                        <style>
+                            @media (max-width: 600px) {
+                                .vision-grid {
+                                    grid-template-columns: 1fr !important;
+                                    gap: 0.5rem !important;
+                                }
+                            }
+                        </style>
+                        
+                        <!-- パスワード確認画面のモバイル対応CSS -->
+                        <style>
+                            #password-confirmation {
+                                position: relative;
+                                z-index: 1000;
+                            }
+                            
+                            @media (max-width: 768px) {
+                                #password-confirmation {
+                                    padding: 2rem 1rem !important;
+                                    margin: 0 !important;
+                                }
+                                
+                                #password-confirmation h2 {
+                                    font-size: var(--font-size-2xl) !important;
+                                }
+                                
+                                #password-display {
+                                    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+                                    padding: 1rem !important;
+                                }
+                                
+                                #password-confirmation > div:last-child {
+                                    flex-direction: column !important;
+                                    gap: 1rem !important;
+                                }
+                                
+                                #password-yes, #password-no {
+                                    width: 100% !important;
+                                    min-width: auto !important;
+                                }
+                            }
+                        </style>
+                        
+                        <div class="form-group">
+                            <label for="motherMaidenName">母親の旧姓 *</label>
+                            <input type="text" id="motherMaidenName" name="motherMaidenName" required placeholder="例：田中">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="experienceCount">経験人数 *</label>
+                            <input type="number" id="experienceCount" name="experienceCount" required min="0" placeholder="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fractureHistory">骨折の経験 *</label>
+                            <select id="fractureHistory" name="fractureHistory" required>
+                                <option value="">選択してください</option>
+                                <option value="none">なし</option>
+                                <option value="once">1回</option>
+                                <option value="twice">2回</option>
+                                <option value="multiple">3回以上</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="studentEffort">学生時代最も力を入れたこと *（300文字以上）</label>
+                            <textarea id="studentEffort" name="studentEffort" required rows="6" placeholder="学生時代に最も力を入れたことについて、具体的なエピソードを交えて300文字以上で記述してください。"></textarea>
+                            <small id="effortCounter" style="color: var(--text-secondary);">0 / 300文字</small>
+                        </div>
+                    </div>
+
+                    <!-- パスワード設定 -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">パスワード設定</h4>
+                        
+                        <div class="form-group">
+                            <label for="password">パスワード *</label>
+                            <input type="password" id="password" name="password" required placeholder="8文字以上で設定してください">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="passwordConfirm">パスワード確認用 *</label>
+                            <input type="password" id="passwordConfirm" name="passwordConfirm" required placeholder="上記と同じパスワードを入力">
+                        </div>
+                    </div>
+
+                    <!-- サービス関連情報 -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">サービス関連情報</h4>
+                        
+                        <div class="form-group">
+                            <label for="experience">爆発物取扱経験 *</label>
+                            <select id="experience" name="experience" required>
+                                <option value="">選択してください</option>
+                                <option value="none">未経験</option>
+                                <option value="beginner">初心者（1年未満）</option>
+                                <option value="intermediate">中級者（1-5年）</option>
+                                <option value="advanced">上級者（5年以上）</option>
+                                <option value="expert">専門家（10年以上）</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="purpose">利用目的 *</label>
+                            <select id="purpose" name="purpose" required>
+                                <option value="">選択してください</option>
+                                <option value="personal">個人的な用途</option>
+                                <option value="business">事業用途</option>
+                                <option value="research">研究用途</option>
+                                <option value="entertainment">エンターテイメント</option>
+                                <option value="educational">教育目的</option>
+                                <option value="other">その他</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emergencyContact">緊急連絡先</label>
+                            <input type="text" id="emergencyContact" name="emergencyContact" placeholder="緊急時の連絡先（任意）">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notes">特記事項</label>
+                            <textarea id="notes" name="notes" rows="3" placeholder="アレルギー、既往歴、その他ご要望など（任意）"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 同意事項 -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--background-section); border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--danger-red); margin-bottom: 1rem;">重要事項・同意事項</h4>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                <input type="checkbox" id="terms" name="terms" required>
+                                <span style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                                    <strong>利用規約・プライバシーポリシーに同意する *</strong><br>
+                                    <small style="color: var(--text-secondary);">サービス利用に関する重要事項をご確認ください。</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                <input type="checkbox" id="safety" name="safety" required>
+                                <span style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                                    <strong>安全規則の遵守に同意する *</strong><br>
+                                    <small style="color: var(--text-secondary);">爆発物の安全な取り扱いに関する規則を遵守することを誓約します。</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                <input type="checkbox" id="liability" name="liability" required>
+                                <span style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                                    <strong>責任の所在について理解・同意する *</strong><br>
+                                    <small style="color: var(--text-secondary);">サービス利用に伴う一切の責任は利用者が負うことを理解します。</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                <input type="checkbox" id="marketing" name="marketing">
+                                <span style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                                    マーケティング情報の受信に同意する（任意）<br>
+                                    <small style="color: var(--text-secondary);">新サービスや特別キャンペーンの情報をお送りします。</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="submit-btn" class="btn-form">会員登録を完了する</button>
+                </form>
+                </div> <!-- registration-form 終了 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ログインチェック
+            if (!isUserLoggedIn()) {
+                showNotification('ログインが必要です', 'error');
+                setTimeout(() => redirectToLogin(), 1000);
+                return;
+            }
+
+            // 別端末からのログインの場合（ログイン済みだが未登録）はスキップボタンを表示
+            // 初回登録済みならダッシュボードへ
+            if (isUserRegistered()) {
+                showNotification('すでに会員登録が完了しています', 'info');
+                setTimeout(() => redirectToDashboard(), 1000);
+                return;
+            }
+
+            // 別端末フラグ：localStorageにセッションはあるがregisteredがない場合
+            // スキップリンクを表示する
+            const skipLink = document.getElementById('skip-registration');
+            if (skipLink) skipLink.style.display = 'block';
+
+            // スキップリンク（別端末からのアクセス時）
+            const skipLinkEl = document.getElementById('skip-link');
+            if (skipLinkEl) {
+                skipLinkEl.addEventListener('click', function() {
+                    setUserRegistered(true);
+                    redirectToDashboard();
+                });
+            }
+
+            const registerForm = document.getElementById('register-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const studentEffortField = document.getElementById('studentEffort');
+            const effortCounter = document.getElementById('effortCounter');
+            const passwordField = document.getElementById('password');
+            const passwordConfirmField = document.getElementById('passwordConfirm');
+
+            // 要素の存在確認
+            if (!registerForm || !submitBtn || !studentEffortField || !effortCounter || !passwordField || !passwordConfirmField) {
+                console.error('必要な要素が見つかりません', {
+                    registerForm: !!registerForm,
+                    submitBtn: !!submitBtn,
+                    studentEffortField: !!studentEffortField,
+                    effortCounter: !!effortCounter,
+                    passwordField: !!passwordField,
+                    passwordConfirmField: !!passwordConfirmField
+                });
+                return;
+            }
+
+            // 文字数カウンター
+            studentEffortField.addEventListener('input', function() {
+                const length = this.value.length;
+                effortCounter.textContent = `${length} / 300文字`;
+                effortCounter.style.color = length >= 300 ? 'var(--primary-color)' : 'var(--text-secondary)';
+            });
+
+            // パスワード一致チェック
+            function checkPasswordMatch() {
+                if (passwordField.value && passwordConfirmField.value) {
+                    if (passwordField.value !== passwordConfirmField.value) {
+                        passwordConfirmField.setCustomValidity('パスワードが一致しません');
+                        passwordConfirmField.style.borderColor = 'var(--danger-red)';
+                    } else {
+                        passwordConfirmField.setCustomValidity('');
+                        passwordConfirmField.style.borderColor = 'var(--primary-color)';
+                    }
+                }
+            }
+
+            passwordField.addEventListener('input', checkPasswordMatch);
+            passwordConfirmField.addEventListener('input', checkPasswordMatch);
+
+            // ボタンクリック処理（フォーム送信の代わり）
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('ボタンクリック開始');
+
+                // バリデーション
+                if (!validateForm(registerForm)) {
+                    console.log('基本バリデーション失敗');
+                    showNotification('必須項目を入力してください', 'error');
+                    return;
+                }
+
+                // ガクチカの文字数チェック
+                const studentEffortText = studentEffortField.value.trim();
+                console.log('ガクチカ文字数:', studentEffortText.length);
+                if (studentEffortText.length < 300) {
+                    console.log('ガクチカ文字数不足');
+                    showNotification('学生時代最も力を入れたことは300文字以上で入力してください', 'error');
+                    studentEffortField.focus();
+                    return;
+                }
+
+                // パスワード一致チェック
+                console.log('パスワード:', passwordField.value);
+                console.log('パスワード確認:', passwordConfirmField.value);
+                if (passwordField.value !== passwordConfirmField.value) {
+                    console.log('パスワード不一致');
+                    showNotification('パスワードが一致しません', 'error');
+                    passwordConfirmField.focus();
+                    return;
+                }
+
+                // パスワード長さチェック
+                if (passwordField.value.length < 8) {
+                    console.log('パスワード長さ不足');
+                    showNotification('パスワードは8文字以上で設定してください', 'error');
+                    passwordField.focus();
+                    return;
+                }
+
+                // 同意事項チェック
+                const requiredCheckboxes = ['terms', 'safety', 'liability'];
+                const uncheckedRequired = requiredCheckboxes.filter(id => {
+                    const element = document.getElementById(id);
+                    return !element || !element.checked;
+                });
+                
+                if (uncheckedRequired.length > 0) {
+                    console.log('同意事項未チェック:', uncheckedRequired);
+                    showNotification('必須の同意事項にチェックを入れてください', 'error');
+                    return;
+                }
+
+                console.log('バリデーション通過、パスワード確認画面表示');
+                // 面白いパスワード確認画面
+                showPasswordConfirmation(passwordField.value);
+            });
+
+            // パスワード確認画面を表示する関数
+            function showPasswordConfirmation(password) {
+                const passwordDisplay = document.getElementById('password-display');
+                const registrationForm = document.getElementById('registration-form');
+                const passwordConfirmation = document.getElementById('password-confirmation');
+                
+                if (!passwordDisplay || !registrationForm || !passwordConfirmation) {
+                    console.error('パスワード確認画面の要素が見つかりません');
+                    // フォールバック: 古い方式
+                    if (confirm(`パスワードは「${password}」です。よろしいですか？`)) {
+                        completeRegistration();
+                    }
+                    return;
+                }
+                
+                console.log('パスワード確認画面表示:', password);
+                passwordDisplay.textContent = password;
+                registrationForm.style.display = 'none';
+                passwordConfirmation.style.display = 'block';
+                
+                // スクロールをトップに
+                window.scrollTo(0, 0);
+            }
+
+            // パスワード確認の「はい」ボタン
+            document.getElementById('password-yes').addEventListener('click', function() {
+                console.log('パスワード確認: はい');
+                completeRegistration();
+            });
+
+            // パスワード確認の「いいえ」ボタン
+            document.getElementById('password-no').addEventListener('click', function() {
+                console.log('パスワード確認: いいえ');
+                const registrationForm = document.getElementById('registration-form');
+                const passwordConfirmation = document.getElementById('password-confirmation');
+                
+                if (registrationForm && passwordConfirmation) {
+                    registrationForm.style.display = 'block';
+                    passwordConfirmation.style.display = 'none';
+                }
+                showNotification('パスワード設定を再確認してください', 'info');
+            });
+
+            // 実際の登録完了処理
+            function completeRegistration() {
+                console.log('登録完了処理開始');
+                
+                // フォームデータ収集
+                const formData = new FormData(registerForm);
+                const registrationData = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    if (registerForm.elements[key] && registerForm.elements[key].type === 'checkbox') {
+                        registrationData[key] = registerForm.elements[key].checked;
+                    } else {
+                        registrationData[key] = value;
+                    }
+                }
+
+                console.log('登録データ:', registrationData);
+
+                // 現在のセッションにユーザー情報を追加
+                const currentSession = getUserSession();
+                const updatedSession = {
+                    ...currentSession,
+                    ...registrationData,
+                    registrationDate: new Date().toISOString()
+                };
+
+                console.log('セッション更新:', updatedSession);
+
+                // セッション情報を更新
+                setUserSession(updatedSession);
+                setUserRegistered(true);
+
+                console.log('登録完了');
+                showNotification('会員登録が完了しました！', 'info');
+                
+                // ダッシュボードへリダイレクト
+                setTimeout(() => {
+                    console.log('ダッシュボードへリダイレクト');
+                    redirectToDashboard();
+                }, 1500);
+            } // completeRegistration 関数の終了
+
+            // 年齢制限チェック（生年月日入力時）
+            document.getElementById('birthDate').addEventListener('change', function(e) {
+                const birthDate = new Date(e.target.value);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                if (age < 18) {
+                    showNotification('18歳未満の方はサービスをご利用いただけません', 'error');
+                    e.target.value = '';
+                }
+            });
+
+            // リアルタイムバリデーション
+            const requiredInputs = registerForm.querySelectorAll('input[required], select[required], textarea[required]');
+            requiredInputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        this.style.borderColor = 'var(--primary-color)';
+                    } else {
+                        this.style.borderColor = 'var(--danger-red)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

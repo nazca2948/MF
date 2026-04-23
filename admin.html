@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GM CONTROL // DETONATION</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green: #00ff41;
+            --green-dim: #00aa2a;
+            --green-dark: #001a00;
+            --red: #ff4444;
+            --red-dim: #aa2222;
+            --yellow: #ffd700;
+            --bg: #030303;
+            --bg2: #0a0a0a;
+            --bg3: #111;
+            --border: rgba(0,255,65,0.2);
+            --text: #00ff41;
+            --text-dim: rgba(0,255,65,0.45);
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* スキャンライン効果 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ヘッダー */
+        .gm-header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gm-header .title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 0.15em;
+            color: var(--green);
+        }
+
+        .gm-header .title span {
+            color: var(--red);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--green-dim);
+        }
+        .status-dot.connected {
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: blink 2s infinite;
+        }
+        .status-dot.error { background: var(--red); }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* メインレイアウト */
+        .gm-main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* セクション共通 */
+        .panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: rgba(0,255,65,0.06);
+            border-bottom: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+        }
+
+        /* 爆弾カード */
+        .bomb-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        @media (max-width: 600px) {
+            .bomb-grid { grid-template-columns: 1fr; }
+        }
+
+        .bomb-card {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.2rem;
+            background: var(--bg3);
+            position: relative;
+        }
+
+        .bomb-card.active-card {
+            border-color: var(--red);
+            box-shadow: 0 0 20px rgba(255,68,68,0.15);
+        }
+
+        .bomb-card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .bomb-card.active-card .bomb-card-title { color: var(--red); }
+
+        .bomb-meta {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            line-height: 2;
+            margin-bottom: 1rem;
+        }
+
+        .bomb-meta .val { color: var(--text); }
+
+        /* タイマー表示 */
+        .bomb-timer {
+            font-size: 1.8rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            color: var(--yellow);
+            text-shadow: 0 0 10px rgba(255,215,0,0.4);
+        }
+        .bomb-timer.inactive-timer { color: var(--text-dim); font-size: 1rem; letter-spacing: 0.05em; }
+
+        /* ボタン */
+        .btn {
+            font-family: var(--font);
+            font-size: 0.82rem;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            border: none;
+            border-radius: 2px;
+            padding: 0.65rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn:last-child { margin-bottom: 0; }
+
+        .btn-arm {
+            background: var(--red);
+            color: #000;
+        }
+        .btn-arm:hover { background: #ff6666; }
+        .btn-arm:disabled {
+            background: var(--red-dim);
+            color: rgba(0,0,0,0.4);
+            cursor: not-allowed;
+        }
+
+        .btn-defuse-toggle {
+            background: transparent;
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+        .btn-defuse-toggle:hover { background: rgba(0,255,65,0.1); }
+        .btn-defuse-toggle.on {
+            background: var(--green);
+            color: #000;
+        }
+        .btn-defuse-toggle.on:hover { background: #00cc33; }
+
+        .btn-reset-bomb {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red-dim);
+            font-size: 0.72rem;
+        }
+        .btn-reset-bomb:hover { background: rgba(255,68,68,0.1); }
+
+        /* 全初期化 */
+        .btn-reset-all {
+            background: transparent;
+            color: var(--red);
+            border: 2px solid var(--red);
+            font-size: 0.9rem;
+            padding: 0.8rem;
+            width: 100%;
+            letter-spacing: 0.1em;
+        }
+        .btn-reset-all:hover { background: rgba(255,68,68,0.1); }
+
+        /* ステータスバッジ */
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 2px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+        .badge-active { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid var(--red-dim); }
+        .badge-inactive { background: rgba(0,255,65,0.06); color: var(--text-dim); border: 1px solid var(--border); }
+        .badge-defused { background: rgba(255,215,0,0.1); color: var(--yellow); border: 1px solid rgba(255,215,0,0.3); }
+
+        /* ログエリア */
+        .log-area {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 0.8rem 1rem;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            height: 120px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .log-area .log-line { display: block; }
+        .log-area .log-line.hi { color: var(--green); }
+        .log-area .log-line.warn { color: var(--yellow); }
+        .log-area .log-line.err { color: var(--red); }
+
+        /* 確認ダイアログ */
+        .confirm-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .confirm-overlay.active { display: flex; }
+
+        .confirm-window {
+            background: var(--bg2);
+            border: 2px solid var(--red);
+            border-radius: 4px;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 0 40px rgba(255,68,68,0.3);
+        }
+
+        .confirm-titlebar {
+            background: var(--red); color: #000;
+            padding: 0.4rem 1rem;
+            font-weight: bold; font-size: 0.8rem;
+            letter-spacing: 0.08em;
+        }
+
+        .confirm-body { padding: 1.5rem; }
+        .confirm-body p {
+            color: var(--text);
+            font-size: 0.82rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-actions { display: flex; gap: 0.8rem; }
+
+        .btn-confirm-yes {
+            flex: 1; background: var(--red); color: #000;
+            border: none; padding: 0.7rem;
+            font-family: var(--font); font-weight: bold;
+            font-size: 0.85rem; cursor: pointer; border-radius: 2px;
+        }
+        .btn-confirm-yes:hover { background: #ff6666; }
+
+        .btn-confirm-no {
+            flex: 1; background: transparent; color: var(--text-dim);
+            border: 1px solid var(--border); padding: 0.7rem;
+            font-family: var(--font); font-size: 0.85rem;
+            cursor: pointer; border-radius: 2px;
+        }
+        .btn-confirm-no:hover { background: rgba(0,255,65,0.05); }
+
+        /* 接続エラー表示 */
+        .conn-error {
+            display: none;
+            background: rgba(255,68,68,0.08);
+            border: 1px solid var(--red-dim);
+            border-radius: 4px;
+            padding: 1rem 1.2rem;
+            font-size: 0.8rem;
+            color: var(--red);
+            text-align: center;
+        }
+        .conn-error.active { display: block; }
+
+        /* ローディング */
+        .loading-text {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 確認ダイアログ -->
+<div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-window">
+        <div class="confirm-titlebar" id="confirm-title">// CONFIRM ACTION</div>
+        <div class="confirm-body">
+            <p id="confirm-message">本当に実行しますか？</p>
+            <div class="confirm-actions">
+                <button class="btn-confirm-yes" id="confirm-yes">[ EXECUTE ]</button>
+                <button class="btn-confirm-no" id="confirm-no">[ ABORT ]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ヘッダー -->
+<div class="gm-header">
+    <div class="title">// DETONATION <span>GM CONTROL</span> v1.0</div>
+    <div class="status-indicator">
+        <div class="status-dot" id="conn-dot"></div>
+        <span id="conn-label">接続中...</span>
+    </div>
+</div>
+
+<!-- メイン -->
+<div class="gm-main">
+
+    <!-- 接続エラー -->
+    <div class="conn-error" id="conn-error">
+        ⚠ Supabaseへの接続に失敗しました。ページをリロードしてください。
+    </div>
+
+    <!-- 爆弾コントロール -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>// BOMB CONTROL</span>
+            <span id="last-updated" class="loading-text">読み込み中...</span>
+        </div>
+        <div class="panel-body">
+            <div class="bomb-grid" id="bomb-grid">
+                <div style="color:var(--text-dim); font-size:0.8rem;">読み込み中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 解除モード -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>// DEFUSE MODE</span>
+        </div>
+        <div class="panel-body">
+            <div class="bomb-meta" style="margin-bottom:1rem;">
+                PCでアンロックされた解除モードの状態をSupabaseで管理します。<br>
+                各爆弾ごとに個別にON/OFF可能です。
+            </div>
+            <div class="bomb-grid" id="defuse-grid">
+                <div style="color:var(--text-dim); font-size:0.8rem;">読み込み中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ログ -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>// SYSTEM LOG</span>
+            <button onclick="clearLog()" style="background:transparent;border:none;color:var(--text-dim);font-family:var(--font);font-size:0.7rem;cursor:pointer;">[ CLEAR ]</button>
+        </div>
+        <div class="panel-body" style="padding:0.8rem;">
+            <div class="log-area" id="log-area"></div>
+        </div>
+    </div>
+
+    <!-- 全初期化 -->
+    <div class="panel">
+        <div class="panel-header"><span>// DANGER ZONE</span></div>
+        <div class="panel-body">
+            <div class="bomb-meta" style="margin-bottom:1rem; color:var(--red); opacity:0.7;">
+                全爆弾をinactiveに戻し、解除モードをリセット、タイマーをクリアします。<br>公演終了後に使用してください。
+            </div>
+            <button class="btn-reset-all" onclick="confirmAction('全初期化', '全爆弾のステータス・タイマー・解除モードをリセットします。\n本当に実行しますか？', resetAll)">
+                ⚠ 全データ初期化
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ===================================================
+//  設定
+// ===================================================
+const SUPABASE_URL = 'https://xkmcjibuelikqptqnsga.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrbWNqaWJ1ZWxpa3FwdHFuc2dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzQxOTUsImV4cCI6MjA5MjUxMDE5NX0.a5pH0jxxedmzfNr4HdDpUh99Zh5Ar2cdArqU1kQcx94';
+
+const HEADERS = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+};
+
+// ===================================================
+//  Supabase API
+// ===================================================
+async function sbGet(table, params = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, { headers: HEADERS });
+    if (!res.ok) throw new Error(`GET ${table} failed: ${res.status}`);
+    return res.json();
+}
+
+async function sbUpsert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method: 'POST',
+        headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`UPSERT ${table} failed: ${res.status}`);
+}
+
+async function sbUpdate(table, match, data) {
+    const params = Object.entries(match).map(([k,v]) => `${k}=eq.${v}`).join('&');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`PATCH ${table} failed: ${res.status}`);
+}
+
+// ===================================================
+//  状態
+// ===================================================
+let bombs = [];
+let gameState = {};
+let countdownIntervals = {};
+let pollInterval = null;
+
+// ===================================================
+//  初期化
+// ===================================================
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadAll();
+    // 10秒ごとにポーリング
+    pollInterval = setInterval(loadAll, 10000);
+});
+
+async function loadAll() {
+    try {
+        const [bombRows, stateRows] = await Promise.all([
+            sbGet('bombs'),
+            sbGet('game_state')
+        ]);
+
+        bombs = bombRows;
+        gameState = {};
+        stateRows.forEach(r => { gameState[r.key] = r.value; });
+
+        setConnected(true);
+        renderBombGrid();
+        renderDefuseGrid();
+        updateTimestamp();
+    } catch (err) {
+        setConnected(false);
+        addLog(`接続エラー: ${err.message}`, 'err');
+    }
+}
+
+// ===================================================
+//  描画
+// ===================================================
+function renderBombGrid() {
+    const grid = document.getElementById('bomb-grid');
+    if (bombs.length === 0) {
+        grid.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;">爆弾データがありません。Supabaseにデータを追加してください。</div>';
+        return;
+    }
+
+    grid.innerHTML = bombs.map(b => {
+        const isActive  = b.status === 'active';
+        const isDefused = b.status === 'defused';
+        const badgeClass = isActive ? 'badge-active' : isDefused ? 'badge-defused' : 'badge-inactive';
+        const badgeText  = isActive ? 'ACTIVE' : isDefused ? 'DEFUSED' : 'INACTIVE';
+
+        const timerId = `timer-${b.id}`;
+
+        return `
+        <div class="bomb-card ${isActive ? 'active-card' : ''}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.8rem;">
+                <div class="bomb-card-title">${b.name || b.id}</div>
+                <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="bomb-meta">
+                ID: <span class="val">${b.id}</span><br>
+                場所: <span class="val">${b.location || '—'}</span>
+            </div>
+            <div class="${isActive ? 'bomb-timer' : 'bomb-timer inactive-timer'}" id="${timerId}">
+                ${isActive ? '--:--:--' : 'STANDBY'}
+            </div>
+            <button class="btn btn-arm"
+                onclick="confirmArm('${b.id}', '${b.name || b.id}')"
+                ${isActive || isDefused ? 'disabled' : ''}>
+                ${isActive ? '[ 起爆中 ]' : isDefused ? '[ 解除済み ]' : '[ 起爆 — 60分タイマー開始 ]'}
+            </button>
+            <button class="btn btn-reset-bomb"
+                onclick="confirmAction('爆弾リセット', '${b.name || b.id} をINACTIVEに戻しますか？', () => resetBomb('${b.id}'))">
+                [ リセット ]
+            </button>
+        </div>`;
+    }).join('');
+
+    // タイマー再起動
+    Object.values(countdownIntervals).forEach(clearInterval);
+    countdownIntervals = {};
+    bombs.forEach(b => {
+        if (b.status === 'active' && b.end_time) {
+            startTimer(`timer-${b.id}`, b.end_time);
+        }
+    });
+}
+
+function renderDefuseGrid() {
+    const grid = document.getElementById('defuse-grid');
+    if (bombs.length === 0) {
+        grid.innerHTML = '';
+        return;
+    }
+
+    grid.innerHTML = bombs.map(b => {
+        const key = `defuse_mode_${b.id}`;
+        const isOn = gameState[key] === 'true';
+        return `
+        <div class="bomb-card">
+            <div class="bomb-card-title" style="font-size:1rem;margin-bottom:0.5rem;">${b.name || b.id}</div>
+            <div class="bomb-meta" style="margin-bottom:1rem;">
+                解除モード: <span class="val">${isOn ? '🟢 ON' : '⚫ OFF'}</span>
+            </div>
+            <button class="btn btn-defuse-toggle ${isOn ? 'on' : ''}"
+                onclick="toggleDefuseMode('${b.id}', ${isOn})">
+                ${isOn ? '[ 解除モード OFF にする ]' : '[ 解除モード ON にする ]'}
+            </button>
+        </div>`;
+    }).join('');
+}
+
+// ===================================================
+//  タイマー
+// ===================================================
+function startTimer(elementId, endTime) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    function tick() {
+        const remaining = new Date(endTime).getTime() - Date.now();
+        if (remaining <= 0) {
+            el.textContent = '00:00:00';
+            clearInterval(countdownIntervals[elementId]);
+            return;
+        }
+        const total = Math.floor(remaining / 1000);
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    countdownIntervals[elementId] = setInterval(tick, 1000);
+}
+
+// ===================================================
+//  アクション
+// ===================================================
+async function armBomb(bombId) {
+    try {
+        const endTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        await sbUpdate('bombs', { id: bombId }, { status: 'active', end_time: endTime });
+        addLog(`爆弾 ${bombId} 起爆 — タイマー60分セット`, 'hi');
+        await loadAll();
+    } catch (err) {
+        addLog(`起爆エラー: ${err.message}`, 'err');
+    }
+}
+
+async function resetBomb(bombId) {
+    try {
+        await sbUpdate('bombs', { id: bombId }, { status: 'inactive', end_time: null });
+        // 解除モードもOFFに
+        await sbUpsert('game_state', { key: `defuse_mode_${bombId}`, value: 'false', updated_at: new Date().toISOString() });
+        addLog(`爆弾 ${bombId} リセット`, 'warn');
+        await loadAll();
+    } catch (err) {
+        addLog(`リセットエラー: ${err.message}`, 'err');
+    }
+}
+
+async function toggleDefuseMode(bombId, currentlyOn) {
+    try {
+        const newVal = currentlyOn ? 'false' : 'true';
+        await sbUpsert('game_state', { key: `defuse_mode_${bombId}`, value: newVal, updated_at: new Date().toISOString() });
+        addLog(`解除モード ${bombId}: ${newVal === 'true' ? 'ON' : 'OFF'}`, 'hi');
+        await loadAll();
+    } catch (err) {
+        addLog(`解除モード切替エラー: ${err.message}`, 'err');
+    }
+}
+
+async function resetAll() {
+    try {
+        // 全爆弾をinactiveに
+        for (const b of bombs) {
+            await sbUpdate('bombs', { id: b.id }, { status: 'inactive', end_time: null });
+            await sbUpsert('game_state', { key: `defuse_mode_${b.id}`, value: 'false', updated_at: new Date().toISOString() });
+        }
+        addLog('全データ初期化完了', 'warn');
+        await loadAll();
+    } catch (err) {
+        addLog(`初期化エラー: ${err.message}`, 'err');
+    }
+}
+
+// ===================================================
+//  確認ダイアログ
+// ===================================================
+let pendingAction = null;
+
+function confirmAction(title, message, action) {
+    pendingAction = action;
+    document.getElementById('confirm-title').textContent = `// ${title}`;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-overlay').classList.add('active');
+}
+
+function confirmArm(bombId, bombName) {
+    confirmAction(
+        '起爆確認',
+        `${bombName} を起爆しますか？\n今から60分のタイマーがスタートします。`,
+        () => armBomb(bombId)
+    );
+}
+
+document.getElementById('confirm-yes').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.remove('active');
+    if (pendingAction) { pendingAction(); pendingAction = null; }
+});
+
+document.getElementById('confirm-no').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.remove('active');
+    pendingAction = null;
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.getElementById('confirm-overlay').classList.remove('active');
+        pendingAction = null;
+    }
+});
+
+// ===================================================
+//  ログ
+// ===================================================
+function addLog(msg, type = '') {
+    const area = document.getElementById('log-area');
+    const line = document.createElement('span');
+    line.className = `log-line ${type}`;
+    const time = new Date().toLocaleTimeString('ja-JP');
+    line.textContent = `[${time}] ${msg}`;
+    area.appendChild(line);
+    area.scrollTop = area.scrollHeight;
+}
+
+function clearLog() {
+    document.getElementById('log-area').innerHTML = '';
+}
+
+// ===================================================
+//  接続状態
+// ===================================================
+function setConnected(ok) {
+    const dot = document.getElementById('conn-dot');
+    const label = document.getElementById('conn-label');
+    const errBanner = document.getElementById('conn-error');
+    if (ok) {
+        dot.className = 'status-dot connected';
+        label.textContent = 'CONNECTED';
+        errBanner.classList.remove('active');
+    } else {
+        dot.className = 'status-dot error';
+        label.textContent = 'CONNECTION ERROR';
+        errBanner.classList.add('active');
+    }
+}
+
+function updateTimestamp() {
+    document.getElementById('last-updated').textContent =
+        `最終更新: ${new Date().toLocaleTimeString('ja-JP')}`;
+    document.getElementById('last-updated').style.animation = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダッシュボード | バクダン解除 - 株式会社DETONATION</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <div class="logo" style="display:flex;align-items:center;gap:1rem;">
+                <img src="logo-icon.png" alt="ロゴ" style="width:40px;height:40px;border-radius:50%;">
+                <div>
+                    <h1 style="font-size:1.4rem;margin:0;">
+                        <a href="index.html" style="text-decoration:none;color:inherit;">
+                            <span style="color:#5fb85f;">バクダン</span><span style="color:#4a90a4;">解除</span>
+                        </a>
+                    </h1>
+                    <p class="tagline">プロフェッショナルサービス</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <span id="user-info" style="color:var(--text-secondary);font-weight:600;"></span>
+                <button id="logout-btn" class="btn-secondary" style="background:transparent;color:var(--text-secondary);border:1px solid var(--text-secondary);padding:0.5rem 1rem;">ログアウト</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>爆弾管理ダッシュボード</h2>
+                <p style="color:var(--text-secondary);margin-bottom:0;">設置済み爆弾のステータスを確認できます</p>
+            </div>
+
+            <div id="loading" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                <p>データを読み込み中...</p>
+            </div>
+
+            <div id="bombs-container" style="display:none;">
+                <section style="margin-bottom:3rem;">
+                    <h3 style="color:var(--text-primary);margin-bottom:2rem;padding-bottom:0.5rem;border-bottom:2px solid var(--primary-color);">
+                        💣 アクティブな爆弾
+                    </h3>
+                    <div id="active-bombs" class="dashboard-grid"></div>
+                </section>
+
+                <section id="inactive-section" style="margin-bottom:3rem;display:none;">
+                    <h3 style="color:var(--text-primary);margin-bottom:2rem;padding-bottom:0.5rem;border-bottom:2px solid var(--accent-color);">
+                        🔒 待機中の爆弾
+                    </h3>
+                    <div id="inactive-bombs" class="dashboard-grid"></div>
+                </section>
+            </div>
+
+            <div id="error-msg" style="display:none;text-align:center;padding:3rem;color:var(--danger-red);">
+                <p>データの読み込みに失敗しました。ページをリロードしてください。</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>株式会社DETONATION</h4>
+                    <p>安全で確実な爆弾設置サービス</p>
+                </div>
+                <div class="footer-section">
+                    <h4>サポート</h4>
+                    <ul>
+                        <li><a href="#emergency">緊急時サポート</a></li>
+                        <li><a href="#technical">技術サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 株式会社DETONATION. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="shared.js"></script>
+    <script>
+    let countdownIntervals = [];
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        if (!requireAuth()) return;
+
+        const session = getUserSession();
+        document.getElementById('user-info').textContent =
+            `こんにちは、${session.fullName || session.username}さん`;
+
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            if (confirm('ログアウトしますか？')) {
+                clearUserSession();
+                showNotification('ログアウトしました', 'info');
+                setTimeout(() => redirectToHome(), 1000);
+            }
+        });
+
+        await loadAndDisplayBombs();
+        // 30秒ごとに自動更新
+        setInterval(loadAndDisplayBombs, 30000);
+
+        window.addEventListener('beforeunload', () => {
+            countdownIntervals.forEach(clearInterval);
+        });
+    });
+
+    async function loadAndDisplayBombs() {
+        try {
+            const allBombs = await getBombData();
+            const bombList = Object.values(allBombs);
+
+            countdownIntervals.forEach(clearInterval);
+            countdownIntervals = [];
+
+            const activeBombs   = bombList.filter(b => b.status === 'active' || b.status === 'defused');
+            const inactiveBombs = bombList.filter(b => b.status === 'inactive');
+
+            displayBombs(activeBombs, 'active-bombs', true);
+
+            if (inactiveBombs.length > 0) {
+                document.getElementById('inactive-section').style.display = 'block';
+                displayBombs(inactiveBombs, 'inactive-bombs', false);
+            } else {
+                document.getElementById('inactive-section').style.display = 'none';
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('bombs-container').style.display = 'block';
+            document.getElementById('error-msg').style.display = 'none';
+
+        } catch (err) {
+            console.error('爆弾データ読み込み失敗:', err);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-msg').style.display = 'block';
+        }
+    }
+
+    function displayBombs(bombs, containerId, isActive) {
+        const container = document.getElementById(containerId);
+        if (bombs.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;color:var(--text-secondary);padding:2rem;">
+                    <p>${isActive ? 'アクティブな爆弾はありません' : '待機中の爆弾はありません'}</p>
+                </div>`;
+            return;
+        }
+        container.innerHTML = bombs.map(b => createBombCard(b)).join('');
+        bombs.forEach(bomb => {
+            if (bomb.status === 'active' && bomb.endTime) {
+                const interval = startCountdown(`countdown-${bomb.id}`, bomb.endTime);
+                if (interval) countdownIntervals.push(interval);
+            }
+        });
+    }
+
+    function createBombCard(bomb) {
+        const isActive  = bomb.status === 'active';
+        const isDefused = bomb.status === 'defused';
+        const statusClass = isActive ? 'active' : 'inactive';
+        const statusText  = isActive ? 'アクティブ' : isDefused ? '解除済み' : '待機中';
+
+        const timerHtml = isActive
+            ? `<div class="countdown" id="countdown-${bomb.id}">--:--:--</div>`
+            : isDefused
+            ? `<div class="countdown" style="color:var(--text-secondary);font-size:1rem;text-align:center;padding:1rem 0;">DEFUSED</div>`
+            : `<div class="countdown" style="color:var(--text-secondary);font-size:1rem;text-align:center;padding:1rem 0;">STANDBY</div>`;
+
+        return `
+            <div class="bomb-card">
+                <div class="bomb-header">
+                    <h3 class="bomb-title">${bomb.name || bomb.id}</h3>
+                    <span class="bomb-status ${statusClass}">${statusText}</span>
+                </div>
+                <div class="bomb-details">
+                    <div class="bomb-detail">
+                        <span class="label">設置場所:</span>
+                        <span class="value">${bomb.location || '—'}</span>
+                    </div>
+                    <div class="bomb-detail">
+                        <span class="label">設置者ID:</span>
+                        <span class="value">${bomb.owner || '—'}</span>
+                    </div>
+                </div>
+                ${timerHtml}
+                <div class="bomb-actions">
+                    <button class="btn-primary"
+                        onclick="redirectToBombStatus('${bomb.id}')"
+                        ${!isActive ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                        詳細を見る
+                    </button>
+                </div>
+            </div>`;
+    }
+    </script>
+</body>
+</html>

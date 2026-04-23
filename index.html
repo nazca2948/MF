@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>バクダン解除 - プロフェッショナルサポートサービス</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <!-- ページ上部のロゴとナビ -->
+      <section
+        style="
+          background: var(--background);
+          padding: 2rem 0;
+          border-bottom: 1px solid var(--border-color);
+        "
+      >
+        <div class="container">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 2rem;
+            "
+          >
+            <div
+              class="logo"
+              style="display: flex; align-items: center; gap: 1rem"
+            >
+              <img
+                src="logo-icon.png"
+                alt="バクダン解除アイコン"
+                style="
+                  width: 50px;
+                  height: 50px;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                "
+              />
+              <div>
+                <h1
+                  style="
+                    font-family: var(--font-display);
+                    font-weight: bold;
+                    font-size: clamp(1.8rem, 4vw, 2.2rem);
+                    margin: 0;
+                  "
+                >
+                  <a
+                    href="index.html"
+                    style="text-decoration: none; color: inherit"
+                  >
+                    <span style="color: #5fb85f">バクダン</span
+                    ><span style="color: #4a90a4">解除</span>
+                  </a>
+                </h1>
+                <p
+                  class="tagline"
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                    margin: 0.2rem 0 0 0;
+                  "
+                >
+                  プロフェッショナルサービス
+                </p>
+              </div>
+            </div>
+            <nav
+              style="
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+                flex-wrap: wrap;
+                position: relative;
+              "
+            >
+              <a href="#about" class="nav-link">サービス概要</a>
+              <a href="#features" class="nav-link">特徴</a>
+              <a href="#pricing" class="nav-link">料金</a>
+              <a href="#contact" class="nav-link">お見積り・ご相談</a>
+              <a
+                href="login.html"
+                class="login-btn"
+                style="text-decoration: none; display: inline-block"
+                >ログイン</a
+              >
+              <!-- ナビゲーション右端装飾 -->
+              <img
+                src="logo-icon.png"
+                alt="装飾アイコン"
+                style="
+                  width: 35px;
+                  height: 35px;
+                  opacity: 0.4;
+                  margin-left: 1rem;
+                "
+              />
+            </nav>
+          </div>
+        </div>
+
+        <!-- モバイル用CSS -->
+        <style>
+          .logo img {
+            transition: var(--transition);
+          }
+
+          @media (max-width: 768px) {
+            .container > div:first-child {
+              flex-direction: column;
+              text-align: center;
+              gap: 1.5rem !important;
+            }
+
+            .logo {
+              gap: 0.8rem !important;
+            }
+
+            .logo img {
+              width: 40px !important;
+              height: 40px !important;
+            }
+
+            .container > div:first-child nav {
+              flex-direction: column;
+              gap: 1rem !important;
+              width: 100%;
+            }
+
+            .container > div:first-child nav .nav-link {
+              padding: 0.5rem;
+              width: 100%;
+              text-align: center;
+              border-bottom: 1px solid var(--border-color);
+            }
+
+            .container > div:first-child nav .nav-link:last-of-type {
+              border-bottom: none;
+            }
+          }
+        </style>
+      </section>
+      <!-- ヒーローセクション -->
+      <section class="hero">
+        <div class="container">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 4rem;
+              align-items: center;
+              min-height: 60vh;
+            "
+          >
+            <!-- 左側：画像エリア（背景画像で表示） -->
+            <div style="position: relative; z-index: 1">
+              <!-- 装飾的なオーバーレイ要素 -->
+              <div
+                style="
+                  position: absolute;
+                  top: 20%;
+                  left: 10%;
+                  width: 60px;
+                  height: 60px;
+                  background: rgba(255, 68, 68, 0.2);
+                  border-radius: 50%;
+                  blur: 10px;
+                "
+              ></div>
+              <div
+                style="
+                  position: absolute;
+                  bottom: 30%;
+                  right: 15%;
+                  width: 40px;
+                  height: 40px;
+                  background: rgba(255, 215, 0, 0.3);
+                  border-radius: 50%;
+                  blur: 5px;
+                "
+              ></div>
+            </div>
+
+            <!-- 右側：テキストエリア -->
+            <div style="position: relative; z-index: 2; padding: 2rem">
+              <h2
+                style="
+                  font-size: clamp(1.8rem, 4vw, 2.5rem);
+                  margin-bottom: 2rem;
+                  color: var(--text-light);
+                  line-height: 1.3;
+                  font-family: var(--font-display);
+                "
+              >
+                最短即日であなたの「壊したい」を実現！<span
+                  style="color: var(--accent-color)"
+                  >面倒な作業から現場への設置まで、スマホ一つでプロに完全丸投げ。</span
+                >
+              </h2>
+              <p
+                style="
+                  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+                  margin-bottom: 2.5rem;
+                  color: var(--text-light);
+                  opacity: 0.9;
+                  line-height: 1.6;
+                "
+              >
+                「<span style="color: #5fb85f">バクダン</span
+                ><span style="color: #4a90a4">解除</span
+                >」は、プロフェッショナル技術者による安心・安全な爆弾処理サービスです。
+              </p>
+              <div class="hero-buttons">
+                <button
+                  id="free-consultation-btn"
+                  class="btn-primary"
+                  style="
+                    font-size: 1.2rem;
+                    padding: 1.2rem 2.5rem;
+                    box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+                  "
+                >
+                  無料相談を申し込む
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- メディア実績セクション -->
+      <section class="media-section">
+        <div class="container">
+          <h3>多くのメディアに取り上げて頂いています！</h3>
+          <div class="media-logos">
+            <div class="media-item">爆弾工学新聞</div>
+            <div class="media-item">デトネーション・ウィークリー</div>
+            <div class="media-item">火薬技術ジャーナル</div>
+            <div class="media-item">爆発物専門誌BOOM</div>
+            <div class="media-item">セキュリティ・トゥデイ</div>
+            <div class="media-item">TNT タイムズ</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 実績セクション -->
+      <section class="results-section">
+        <div class="container">
+          <h3>最新の実績報告</h3>
+          <div class="results-list">
+            <div class="result-item">
+              <span class="date">2026.04.12</span>
+              <span class="content"
+                >【実績報告】本日42名の爆弾設置完了《初心者サポート大成功》</span
+              >
+            </div>
+            <div class="result-item">
+              <span class="date">2026.04.11</span>
+              <span class="content"
+                >【実績報告】本日38名の爆弾設置完了《設置場所の相談からお手伝い》</span
+              >
+            </div>
+            <div class="result-item">
+              <span class="date">2026.04.10</span>
+              <span class="content"
+                >【実績報告】本日45名の爆弾設置完了《技術指導も万全》</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- サービス概要セクション -->
+      <section id="about" class="about-section">
+        <div class="container">
+          <h3>バクダン介助とは？</h3>
+          <p class="about-text">
+            バクダン介助は、お客様の抱える不満や破壊衝動を、至高のエンターテインメントとして代行および実現するサービスです。
+            ただ即座に爆発させるだけの単調な破壊行為は美学に反すると当社は考えております。ターゲットに迫りくるタイムリミットを突きつけ、極限状態の恐怖と絶望の中で足掻く猶予を与えることこそが、本サービスの真の価値です。
+            当社から専門の工作員を現地へ派遣した後は、お客様が危険な現場へ赴く必要は一切ありません。安全な場所から、ターゲットが織りなす究極のデスゲームという最高のショーを観賞するだけで目的は達成されます。設置場所の選定からタイムリミットの調整などの細かなゲームバランスの設計も、当社の専属ゲームマスターが完璧にコーディネートいたします。
+            当社は創業以来、捜査機関の介入や情報漏洩といったトラブル発生率0%を維持しております。いかに厳重な警備網であっても、一切の痕跡を残さず確実に「ゲームの舞台」を構築する、特殊機関出身の精鋭による確実な遂行力とノウハウがございます。最高のスリルとカタルシスを、どうぞご安心してお楽しみください。
+          </p>
+        </div>
+      </section>
+
+      <!-- 特徴セクション -->
+      <section id="features" class="features-section">
+        <div class="container">
+          <h3>バクダン介助の強み</h3>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-number">POINT1</div>
+              <h4>火薬類取扱のプロによる確実な施工</h4>
+              <p>
+                元特殊機関出身の専門家が業務を監修しています。現場の構造や標的に合わせた最適な爆薬の選定から、確実な起爆システムの構築まで、素人には難しい作業をすべてプロフェッショナルが代行します。
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-number">POINT2</div>
+              <h4>完全匿名と鉄壁のセキュリティ</h4>
+              <p>
+                適当な偽装による杜撰な情報管理はいたしません。ご依頼はすべて海外の暗号化サーバーを経由し、お客様の個人情報やご依頼内容が外部の捜査機関などに漏洩することは一切ありません。
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-number">POINT3</div>
+              <h4>未設置や不発時の全額返金保証</h4>
+              <p>
+                絶対の自信があるからこそ、万が一ターゲットへの設置が完了しなかった場合や、指定時刻に正常に起爆しなかった場合は、お支払いいただいた費用を全額返金いたします。
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-number">POINT4</div>
+              <h4>証拠隠滅まで見据えた徹底サポート</h4>
+              <p>
+                ただ設置して終わりではありません。爆発後の現場検証を見越したダミー証拠の配置や、監視カメラの死角を突いた搬入ルートの策定など、お客様に捜査の手が及ばないためのコンサルティングも何度でも無料で行います。
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-number">POINT5</div>
+              <h4>追跡不可能な決済と柔軟な支払いプラン</h4>
+              <p>
+                ビットコインやモネロなどの暗号資産決済に完全対応しており、足のつく銀行口座やクレジットカードは不要です。また、確実な実行をお約束するため、着手金と成功報酬に分けた独自の分割払いにも対応しております。
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-number">POINT6</div>
+              <h4>日本全国365日24時間いつでも暗号化通信で対応</h4>
+              <p>
+                思い立ったその日に行動へ移せるよう、シグナルやテレグラムなどの秘匿性の高いメッセージアプリで24時間ご相談を受け付けております。深夜や早朝の緊急案件であっても、最短即日で工作員を現地へ派遣可能です。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 料金プラン -->
+      <section id="pricing" class="pricing-section">
+        <div class="container">
+          <h3>料金プラン</h3>
+          <div class="pricing-grid">
+            <div class="pricing-card">
+              <h4>ビギナープラン</h4>
+              <div class="price">¥150,000</div>
+              <ul class="features-list">
+                <li>基本的な爆弾設置</li>
+                <li>設置場所コンサルティング</li>
+                <li>24時間サポート</li>
+                <li>設置後レポート</li>
+              </ul>
+            </div>
+
+            <div class="pricing-card featured">
+              <h4>プロフェッショナル</h4>
+              <div class="price">¥300,000</div>
+              <ul class="features-list">
+                <li>ビギナープランの全機能</li>
+                <li>高性能爆弾設置</li>
+                <li>タイマー設定</li>
+                <li>遠隔起動システム</li>
+                <li>事後処理サポート</li>
+              </ul>
+            </div>
+
+            <div class="pricing-card">
+              <h4>エンタープライズ</h4>
+              <div class="price">¥500,000</div>
+              <ul class="features-list">
+                <li>プロフェッショナルの全機能</li>
+                <li>複数地点同時設置</li>
+                <li>専属コンサルタント</li>
+                <li>法的サポート</li>
+                <li>完全匿名対応</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 爆弾ステータスプレビュー -->
+      <section class="status-preview">
+        <div class="container">
+          <h3>爆弾ステータス（一部公開）</h3>
+          <p class="status-note">※ログイン後、詳細情報をご確認いただけます</p>
+
+          <!-- ローディング -->
+          <div id="index-bombs-loading" style="text-align:center;opacity:0.5;font-family:var(--font-mono);font-size:0.9rem;">
+            読み込み中...
+          </div>
+
+          <!-- 爆弾カード（JSで生成） -->
+          <div id="index-bombs-container" style="display:none; max-width:900px; margin:0 auto;">
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ セクション -->
+      <section class="faq-section">
+        <div class="container">
+          <h3>よくあるご質問</h3>
+          <div class="faq-list">
+            <div class="faq-item">
+              <h4>本当に設置してもらえるの？</h4>
+              <p>
+                当社はこれまで累計1万件以上の設置を完了させた確かな実績があります。事前の綿密な現地調査を行い、ターゲットの行動パターンや建物の警備状況を徹底的に分析します。最適な爆薬の種類と確実な搬入ルートを選定し、熟練の工作員が周囲に気付かれることなくミッションを遂行いたします。万が一設置ができなかった場合の全額返金保証もございますのでご安心ください。
+              </p>
+            </div>
+
+            <div class="faq-item">
+              <h4>法律的に大丈夫？</h4>
+              <p>
+                本サービスは性質上、各国の法令に抵触する非常にデリケートな業務となります。そのため、当社ではお客様の絶対的な安全を最優先とし、ご依頼から決済まで完全匿名の暗号化通信のみを使用しております。実行役である当社スタッフとお客様の直接的な接点は完全に遮断されており、後日捜査の手がお客様に及ぶリスクを極限まで排除するシステムを構築しております。
+              </p>
+            </div>
+
+            <div class="faq-item">
+              <h4>設置後の急なキャンセルやサポートは？</h4>
+              <p>
+                お客様ご自身の判断でゲームを強制終了させたい場合に備え、ご依頼主様にのみ事前付与されるマスターコードを用いていつでも遠隔解除が可能です。また、別料金のオプションにて現場からの安全なデバイス回収および証拠隠滅作業も承っておりますのでご安心ください。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- お見積り・ご相談セクション -->
+      <section id="contact" class="contact-section">
+        <div class="container">
+          <h3>お見積り・ご相談</h3>
+          <p>
+            爆弾設置に関するお見積りやご相談は、専用フォームからお気軽にお申し込みください。<br />
+            専門スタッフが詳しい内容をお伺いし、最適なプランをご提案いたします。
+          </p>
+          <div class="contact-buttons">
+            <button
+              class="btn-contact"
+              onclick="window.open('https://forms.gle/example', '_blank')"
+            >
+              📝 お見積りフォーム
+            </button>
+            <button
+              class="btn-contact"
+              onclick="window.open('https://forms.gle/example2', '_blank')"
+            >
+              💬 ご相談フォーム
+            </button>
+            <button
+              class="btn-contact"
+              onclick="window.open('https://forms.gle/example3', '_blank')"
+            >
+              📞 電話相談予約
+            </button>
+          </div>
+          <div
+            style="
+              margin-top: 2rem;
+              padding: 1.5rem;
+              background: var(--background-section);
+              border-radius: var(--radius-md);
+            "
+          >
+            <h4 style="color: var(--primary-color); margin-bottom: 1rem">
+              📋 フォーム入力時の注意事項
+            </h4>
+            <ul
+              style="
+                color: var(--text-secondary);
+                line-height: 1.8;
+                padding-left: 1.5rem;
+              "
+            >
+              <li>設置場所の詳細情報をお教えください</li>
+              <li>ご希望の日程・時間帯をご記入ください</li>
+              <li>特殊な要件がある場合は詳しくお聞かせください</li>
+              <li>緊急案件の場合は電話相談をご利用ください</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 利用規約モーダル -->
+    <div id="terms-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>利用規約</h2>
+          <span class="close" id="terms-close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <h3>第1条 規約の適用範囲および目的</h3>
+          <p>
+            本利用規約は株式会社DETONATIONがインターネットおよびその他の通信手段を通じて提供するすべての爆弾設置代行サービスならびにそれに付随する一切のコンサルティング業務に対して適用される絶対的な規則を定めるものです。当社のサービスに対するお問い合わせ、お見積りのご依頼、または正式な申し込み手続きのいずれかを開始した時点で、依頼者は本規約に記載されたすべての条項を余すところなく熟読し、その内容の重大性を完全に理解し、かつ一切の異議申し立てを行わず無条件で同意したものとして厳格に取り扱われます。本規約の内容は当社の経営判断により事前の予告や依頼者への通知を行うことなく随時改定される可能性があり、変更後の規約は当社のウェブサイト上に掲載された時点をもって即座に効力を発揮し、以降のすべての取引および進行中の案件に対して遡及的に適用されるものとします。
+          </p>
+
+          <h3>第2条 提供される役務の定義と適正業務の限界</h3>
+          <p>
+            当社が提供する役務は、依頼者の指定した目的と場所に対して、当社所属の爆発物取扱主任者が算出した適切な仕様の装置を運搬し、現場に物理的に配置し、指定のタイミングで起動可能な状態へと移行させる一連のプロセス全般を指します。当社は法務省への独自の届け出を行っている法人であり、すべての作業は当社が規定する安全基準内で実行されますが、当社の設置業務完了後に発生する物理的破壊、対象物の完全な消滅、火災、周辺地域への延焼、器物損壊、人身への重大な影響、ならびにそれらに起因して発生する二次的な経済的損失や精神的苦痛について、当社は一切の法的責任、損害賠償責任、および道義的責任から完全に免責されるものとします。当社の契約上の責任範囲はあくまで対象物への確実な設置の完了報告までであり、その後の起爆の成否、火力の不足、または過剰な破壊効果については一切の保証を行いません。
+          </p>
+
+          <h3>第3条 依頼者側に要求される遵守事項および禁止行為のリスト</h3>
+          <p>
+            業務の安全かつ確実な遂行を担保し当社の事業を存続させるため、依頼者には極めて厳密な行動制限が課せられます。依頼者は当社との契約成立の瞬間から業務完了の報告を受け取るまでの全期間において、設置対象となるエリアおよびその周辺半径一キロメートル以内にいかなる理由があろうとも立ち入ることを固く禁じられます。また、当社の現地作業員に対する直接の接触、尾行、監視行為、ならびに通信機器を用いた業務への不当な干渉は一切認められません。さらに、ソーシャルメディア、匿名掲示板、友人や家族への口外を含め、当社との接触事実や本件に関わるいかなる情報も外部へ漏洩させることを永久に禁じます。これらの禁止事項のいずれか一つにでも違反した形跡が当社の監視網によって確認された場合、当社は事前の通告なく即座に全作業を中止し、現場の証拠隠滅を含む緊急撤収措置を講じるとともに、契約金額の五倍に相当する違約金および対応に要した特別経費の全額を依頼者に対して即時一括で請求する権利を有します。
+          </p>
+
+          <h3>第4条 決済システムと債務不履行時における強制執行措置</h3>
+          <p>
+            料金の支払いは当社が事前の見積もりにて指定した期日までに、当社が指定する追跡困難な決済手段によって完全に完了されなければなりません。業界相場より圧倒的に安い価格設定を維持し事業を成立させるため、当社は支払いの遅延に対してはいかなる事情の斟酌も行わず極めて厳格な姿勢で臨みます。当社が提供するあと払い制度を利用し、指定された期日の午後十一時五十九分までに支払いの完了が確認できなかった場合、翌日より法定上限金利に独自のペナルティ率を加算した遅延損害金が日割りで無制限に加算され続けます。さらに、期日から起算して七十二時間が経過した時点で、案件は当社の債権回収を専門とする特殊実力行使部署へと自動的に移管されます。この移管が行われた場合、依頼者の職場、親族、または事前の信用調査で判明したあらゆる関係先に対して徹底的な回収業務が昼夜を問わず開始されるとともに、当社が有するあらゆる物理的および情報的な手段を用いて債権の回収を強制的に完遂するものとし、依頼者はこれに対する一切の抵抗権を放棄するものとします。
+          </p>
+
+          <h3>第5条 返金保証制度の厳格な適用条件と免責される不可抗力</h3>
+          <p>
+            当社の最大の強みとして掲げている設置できなかった場合の全額保証制度は、当社の実行部隊の完全な怠慢や内部的な重大な過失によってのみ適用される、極めて限定的かつ例外的な救済措置です。依頼者から提供された対象物件の情報に意図的または過失による虚偽、誤り、あるいは警備体制に関する重要な事実の隠蔽が含まれていた場合は即座に保証の対象外となります。また、対象エリアに予期せぬ自然災害が発生した場合、警察機関や公安組織による大規模な警戒態勢が突発的に敷かれた場合、対象となる人物や物件が当社の事前の想定を超えた速度で移動または完全に消滅した場合、さらには他社の設置業者と現場で競合し交戦状態に陥った場合など、当社の統制が及ばない外部要因や不可抗力に起因する業務の未達についても全額保証は一切適用されず、既にお支払いいただいた代金は事前の現地調査費用および作業員への危険手当、ならびに撤退費用の補填として全額没収されます。
+          </p>
+
+          <p
+            style="
+              text-align: right;
+              margin-top: 2rem;
+              color: var(--text-secondary);
+            "
+          >
+            制定日：2026年4月12日<br />
+            株式会社DETONATION
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="privacy-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>プライバシーポリシー</h2>
+          <span class="close" id="privacy-close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <h3>第1条 個人情報の定義および収集の範囲に関する基本方針</h3>
+          <p>
+            当社が提供する各種代行業務の性質上、極めて高度な機密性が要求されることを踏まえ、依頼者から提供されるあらゆる情報を厳重に管理します。収集対象となる情報には依頼者自身の氏名、住所、生年月日、職業、各種連絡先、金融機関口座情報、および信用情報が含まれます。また、業務遂行に不可欠なデータとして、対象となる物件の所在地、詳細な間取り、建材の強度データ、周辺の交通状況、警備体制のシフト表、監視カメラの配置状況、さらには標的となる特定の人物が存在する場合における当該人物の詳細な行動パターン、交友関係、ならびに勤務先情報等、事案の達成に必要な一切の周辺情報も包括して収集します。これらの情報は当社のウェブサイト上の入力フォーム、電子メール、通信アプリの履歴、および当社が独自に手配する現地調査員からの報告などを通じて多角的に取得され、当社の高度に暗号化された独自のオフラインサーバー内にて無期限に保管されます。
+          </p>
+
+          <h3>第2条 収集した機密情報および個人情報の利用目的の細則</h3>
+          <p>
+            当社が取得した情報は、依頼された設置業務を当社の解釈する法令の範囲内で極めて安全かつ確実に完遂するための計画立案、および対象物件に最も適した起爆装置の選定と火力計算の目的にのみ利用されます。これに加えて、最適な実行部隊の編成、現場への進入および退出ルートの確立、ならびに実行後における証拠隠滅作業の精度向上のためのデータ解析にも活用されます。さらに、当社が提供する二種類のあと払い決済システムを利用する依頼者に対しては、回収不能リスクを完全に排除するため、提供された情報を基に厳格な与信審査を実施します。この審査プロセスにおいて、必要に応じて当社の提携する外部の信用情報機関や独自の情報網に対して照会を行う場合があり、依頼者は本サービスの申し込み手続きを開始した時点でこの照会および調査プロセスに無条件で同意したものとみなされます。
+          </p>
+
+          <h3>第3条 第三者への情報提供の制限ならびに例外的な開示条件</h3>
+          <p>
+            当社は依頼者のプライバシーと匿名性を最優先事項として位置づけており、原則として本人の書面による明確な同意なく第三者へ個人情報および案件の詳細を提供することはありません。ただし、現場での物理的な作業を下請けとして委託する提携作業員や特殊工作員に対しては、業務遂行に必要不可欠な範囲に限定して情報を共有します。また、事案の進行中または完了後に不測の事態が発生し、警察機関その他の公的権力から正式な法的手続きに基づく情報開示要求があった場合、当社は自らの企業防衛および関係作業員の安全確保を最優先とし、当社の顧問弁護団および爆発物取扱主任者の協議と独自の判断に基づき、依頼者の同意を待つことなく関係当局に対して適切に情報を開示し捜査に協力する権利を完全に留保します。
+          </p>
+
+          <p
+            style="
+              text-align: right;
+              margin-top: 2rem;
+              color: var(--text-secondary);
+            "
+          >
+            制定日：2026年4月12日<br />
+            最終更新日：2026年4月12日<br />
+            株式会社DETONATIONバクダン介助
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>株式会社DETONATION</h4>
+            <p>〒100-0001 東京都千代田区千代田1-1-1</p>
+            <p>TEL: 03-1234-5678</p>
+            <p>代表取締役: 爆田 爆男</p>
+          </div>
+
+          <div class="footer-section">
+            <h4>サービス</h4>
+            <ul>
+              <li><a href="#about">バクダン介助とは？</a></li>
+              <li><a href="#features">バクダン介助の強み</a></li>
+              <li><a href="#pricing">料金プラン</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>サポート</h4>
+            <ul>
+              <li><a href="#contact">お問い合わせ</a></li>
+              <li><a href="javascript:void(0)" id="terms-link">利用規約</a></li>
+              <li>
+                <a href="javascript:void(0)" id="privacy-link"
+                  >プライバシーポリシー</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2026 株式会社DETONATION. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="shared.js"></script>
+    <script>
+      // 爆弾ステータスプレビュー（Supabase）
+      async function loadIndexBombs() {
+        try {
+          const allBombs = await getBombData();
+          const bombs = Object.values(allBombs).filter(b => b.status === 'active' || b.status === 'defused');
+          document.getElementById('index-bombs-loading').style.display = 'none';
+          if (bombs.length === 0) {
+            document.getElementById('index-bombs-loading').textContent = '現在アクティブな爆弾はありません';
+            document.getElementById('index-bombs-loading').style.display = 'block';
+            return;
+          }
+          const container = document.getElementById('index-bombs-container');
+          container.style.display = 'grid';
+          container.style.gridTemplateColumns = bombs.length > 1 ? '1fr 1fr' : '1fr';
+          container.style.gap = '2rem';
+          container.innerHTML = bombs.map(b => `
+            <div style="background:rgba(255,255,255,0.1);padding:2rem;border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,0.2);backdrop-filter:blur(10px);">
+              <h2 style="color:var(--accent-color);font-size:2.5rem;margin-bottom:1rem;font-family:var(--font-display);">${b.name || b.id}</h2>
+              <div style="font-family:var(--font-mono);font-size:1rem;line-height:2;opacity:0.9;margin-bottom:1.5rem;">
+                <p><strong>設置場所:</strong> ████████</p>
+                <p><strong>残り時間:</strong> <span id="index-timer-${b.id}" style="color:var(--accent-color);">██:██:██</span></p>
+                <p><strong>解除コード:</strong> ████████</p>
+                <p style="margin-top:1rem;font-size:0.85rem;opacity:0.7;">※機密情報のため一部マスク表示</p>
+              </div>
+              <button class="btn-status" onclick="window.location.href='login.html'" style="font-size:1rem;padding:1rem 2rem;width:100%;">
+                詳細ステータスを確認（要ログイン）
+              </button>
+            </div>
+          `).join('');
+          bombs.forEach(b => {
+            if (b.status === 'active' && b.endTime) startCountdown('index-timer-' + b.id, b.endTime);
+            else { const el = document.getElementById('index-timer-' + b.id); if(el) el.textContent = 'DEFUSED'; }
+          });
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      document.addEventListener("DOMContentLoaded", loadIndexBombs);
+    </script>
+    <script>
+      // file://プロトコル対応版 - ナビゲーション機能削除
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("=== シンプルモード ===");
+
+        // 無料相談ボタン
+        const consultationBtn = document.getElementById(
+          "free-consultation-btn",
+        );
+        if (consultationBtn) {
+          consultationBtn.addEventListener("click", function () {
+            // お問い合わせセクションにスクロール
+            const contactSection = document.getElementById("contact");
+            if (contactSection) {
+              contactSection.scrollIntoView({ behavior: "smooth" });
+            } else {
+              alert("ページ下部のお問い合わせフォームをご利用ください。");
+            }
+          });
+        }
+
+        // 利用規約・プライバシーポリシーモーダル
+        function setupModal(linkId, modalId, closeId) {
+          console.log("setupModal呼び出し:", linkId, modalId, closeId);
+          const link = document.getElementById(linkId);
+          const modal = document.getElementById(modalId);
+          const closeBtn = document.getElementById(closeId);
+
+          console.log("要素取得結果:");
+          console.log("- link:", !!link, link);
+          console.log("- modal:", !!modal, modal);
+          console.log("- closeBtn:", !!closeBtn, closeBtn);
+
+          if (link && modal && closeBtn) {
+            console.log("✅ モーダル設定成功:", linkId);
+            link.addEventListener("click", function (e) {
+              e.preventDefault();
+              console.log("モーダル表示:", modalId);
+              modal.style.display = "block";
+              document.body.style.overflow = "hidden";
+            });
+
+            closeBtn.addEventListener("click", function () {
+              console.log("モーダル閉じる:", modalId);
+              modal.style.display = "none";
+              document.body.style.overflow = "auto";
+            });
+
+            // 外側クリックで閉じる
+            window.addEventListener("click", function (e) {
+              if (e.target === modal) {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+              }
+            });
+          } else {
+            console.error(
+              "❌ モーダル設定失敗:",
+              linkId,
+              "要素が見つかりません",
+            );
+          }
+        }
+
+        setupModal("terms-link", "terms-modal", "terms-close");
+        setupModal("privacy-link", "privacy-modal", "privacy-close");
+
+        // ESCキーでモーダルを閉じる
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            const modals = ["terms-modal", "privacy-modal"];
+            modals.forEach(function (modalId) {
+              const modal = document.getElementById(modalId);
+              if (modal && modal.style.display === "block") {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+              }
+            });
+          }
+        });
+
+        console.log("初期化完了 - エラーなし");
+      });
+    </script>
+  </body>
+</html>

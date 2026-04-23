@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爆弾ステータス | バクダン解除 - 株式会社DETONATION</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body { height: 100%; }
+        body {
+            background: var(--background-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* モバイルはスクロール許可 */
+        @media (max-width: 700px) {
+            html, body { height: auto; overflow: auto; }
+        }
+
+        /* ヘッダー */
+        .bomb-header-bar {
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(255,68,68,0.3);
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bomb-header-bar .logo-area { display: flex; align-items: center; gap: 0.8rem; }
+        .bomb-header-bar img { width: 34px; height: 34px; border-radius: 50%; }
+        .bomb-header-bar h1 { font-size: clamp(1rem, 3vw, 1.3rem); margin: 0; }
+        .bomb-header-bar .tagline { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin: 0; }
+
+        /* 警告バー */
+        .warning-bar {
+            display: none; flex-shrink: 0;
+            background: rgba(255,68,68,0.12);
+            border-top: 1px solid var(--danger-red);
+            border-bottom: 1px solid var(--danger-red);
+            padding: 0.4rem 1rem;
+            text-align: center;
+            font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+            color: var(--danger-red);
+        }
+
+        /* メイン：左右2カラム */
+        .bomb-main {
+            flex: 1; min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1rem, 3vw, 3rem);
+            padding: clamp(1rem, 3vh, 2rem) clamp(1rem, 4vw, 3rem);
+        }
+        @media (max-width: 700px) {
+            .bomb-main {
+                grid-template-columns: 1fr;
+                overflow: visible;
+                min-height: auto;
+            }
+        }
+
+        /* 左カラム */
+        .bomb-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(1rem, 3vh, 2rem);
+        }
+        .time-breakdown.critical .t-num { color: var(--danger-red); animation: pulse 1s infinite; }
+        .time-breakdown.critical .time-sep { color: rgba(255,68,68,0.5); }
+
+        .status-row {
+            display: flex;
+            gap: clamp(0.8rem, 2vw, 1.5rem);
+            flex-wrap: wrap;
+        }
+        .status-cell {
+            border: 1px solid rgba(255,68,68,0.25);
+            border-radius: var(--radius-md);
+            padding: clamp(0.5rem, 1.5vh, 0.8rem) clamp(0.8rem, 1.5vw, 1.2rem);
+            background: rgba(255,68,68,0.04);
+            min-width: 8em;
+        }
+        .status-cell .s-label {
+            font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        .status-cell .s-value {
+            font-family: var(--font-mono);
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* 右カラム：ヒント画像 */
+        .bomb-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 4rem;
+        }
+        @media (max-width: 700px) {
+            .bomb-right { padding-bottom: 1rem; }
+        }
+        .hint-image-wrap {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,68,68,0.2);
+            border-radius: var(--radius-lg);
+            background: rgba(255,68,68,0.03);
+            overflow: hidden;
+        }
+        .hint-image-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+        }
+        .hint-image-wrap .no-image {
+            color: rgba(255,255,255,0.2);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* ターミナルオーバーレイ */
+        #terminal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: #000; z-index: 9000;
+            font-family: 'Courier New', monospace;
+            color: #00ff41;
+            padding: 2rem;
+            overflow: hidden;
+            flex-direction: column;
+        }
+        #terminal-overlay.active { display: flex; }
+        #terminal-glitch { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .glitch-char {
+            position: absolute; font-family: 'Courier New', monospace;
+            color: #00ff41; opacity: 0;
+            animation: glitch-fall linear forwards;
+        }
+        @keyframes glitch-fall {
+            0%   { opacity: 0.7; transform: translateY(-20px); }
+            80%  { opacity: 0.3; }
+            100% { opacity: 0;   transform: translateY(60px); }
+        }
+        #terminal-content {
+            position: relative; z-index: 1;
+            font-size: clamp(0.7rem, 1.4vw, 0.9rem);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+        #terminal-cursor {
+            display: inline-block;
+            width: 0.6em; height: 1em;
+            background: #00ff41;
+            vertical-align: text-bottom;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+        /* 解除モーダル（オーバーライド） */
+        #override-modal {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #override-modal.active { display: flex; }
+        .override-window {
+            background: #0a0a0a;
+            border: 2px solid #00ff41;
+            border-radius: 4px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 0 40px rgba(0,255,65,0.3);
+            font-family: 'Courier New', monospace;
+        }
+        .override-titlebar {
+            background: #00ff41; color: #000;
+            padding: 0.4rem 1rem;
+            font-weight: bold; font-size: 0.85rem;
+            display: flex; justify-content: space-between;
+        }
+        .override-body { padding: 1.5rem; }
+        .override-body > p {
+            color: #00ff41; font-size: 0.8rem;
+            margin-bottom: 1.5rem; line-height: 1.6;
+        }
+        .override-field { margin-bottom: 1.2rem; }
+        .override-field label {
+            display: block; color: #00aa2a;
+            font-size: 0.75rem; margin-bottom: 0.3rem;
+        }
+        .override-field input {
+            width: 100%; background: #000;
+            border: 1px solid #00ff41; border-radius: 2px;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            padding: 0.6rem 0.8rem;
+            outline: none; box-sizing: border-box;
+        }
+        .override-field input:focus { border-color: #fff; box-shadow: 0 0 8px rgba(0,255,65,0.4); }
+        .override-actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+        .override-btn-execute {
+            flex: 1; background: #00ff41; color: #000; border: none;
+            padding: 0.7rem; font-family: 'Courier New', monospace;
+            font-weight: bold; font-size: 0.9rem;
+            cursor: pointer; border-radius: 2px;
+        }
+        .override-btn-execute:hover { background: #00cc33; }
+        .override-btn-cancel {
+            flex: 1; background: transparent; color: #ff4444;
+            border: 1px solid #ff4444; padding: 0.7rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem; cursor: pointer; border-radius: 2px;
+        }
+        .override-btn-cancel:hover { background: rgba(255,68,68,0.1); }
+
+        /* IP・DNS入力 */
+        .ip-input-row, .dns-input-row { display: flex; align-items: center; gap: 0.2em; }
+        .ip-seg {
+            background: #000; border: 1px solid #00ff41; border-radius: 2px;
+            color: #00ff41; font-family: 'Courier New', monospace; font-size: 0.9rem;
+            padding: 0.5rem 0.4rem; text-align: center; outline: none;
+            width: 3.5em; box-sizing: border-box;
+        }
+        .ip-seg-sm { width: 2em; }
+        .ip-seg-md { width: 2.8em; }
+        .ip-seg:focus, #dns-a:focus, #dns-b:focus { border-color: #fff; box-shadow: 0 0 6px rgba(0,255,65,0.4); }
+        .ip-dot { color: #00ff41; font-family: 'Courier New', monospace; font-size: 1.1rem; }
+        #dns-a, #dns-b {
+            background: #000; border: 1px solid #00ff41; border-radius: 2px;
+            color: #00ff41; font-family: 'Courier New', monospace; font-size: 0.9rem;
+            padding: 0.5rem 0.4rem; text-align: center; outline: none;
+            box-sizing: border-box;
+        }
+        .ip-computed {
+            background: #001a00; border: 1px solid #00aa2a; border-radius: 2px;
+            color: #00ff41; font-family: 'Courier New', monospace; font-size: 1rem;
+            padding: 0.5rem 0.8rem; outline: none; width: 7em;
+            letter-spacing: 0.2em; text-align: center; box-sizing: border-box;
+        }
+        .ip-computed.computed { border-color: #00ff41; }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* タイマー */
+        .time-breakdown {
+            display: flex;
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+            align-items: flex-start;
+        }
+        .time-unit { text-align: center; }
+        .time-unit .t-num {
+            font-family: var(--font-mono);
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            color: var(--text-light);
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(255,68,68,0.4);
+            letter-spacing: 0.02em;
+        }
+        .time-unit .t-label {
+            font-size: clamp(0.55rem, 1vw, 0.65rem);
+            color: rgba(255,255,255,0.25);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+        .time-sep {
+            font-family: var(--font-mono);
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            color: rgba(255,255,255,0.3);
+            line-height: 1;
+        }
+
+        /* 爆弾名 */
+        .bomb-name-display {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            color: var(--danger-red);
+            line-height: 1;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255,68,68,0.3);
+        }
+
+        /* ステータスインジケーター */
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 0.4em;
+            vertical-align: middle;
+            background: #555;
+        }
+        .status-dot.active {
+            background: var(--danger-red);
+            box-shadow: 0 0 6px rgba(255,68,68,0.8);
+            animation: dot-blink 1.2s infinite;
+        }
+        .status-dot.inactive { background: #444; }
+        @keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        /* ログ風テキスト */
+        .sys-log {
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.6rem, 1.1vw, 0.72rem);
+            color: rgba(255,68,68,0.35);
+            line-height: 1.9;
+            border-left: 1px solid rgba(255,68,68,0.15);
+            padding-left: 0.8rem;
+        }
+        .sys-log span { display: block; }
+        .sys-log .log-hi { color: rgba(255,68,68,0.55); }
+
+        /* 解除モードトグル */
+        #defuse-toggle-btn {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem; right: 1.5rem;
+            background: #00ff41; color: #000;
+            font-family: 'Courier New', monospace;
+            font-weight: bold; font-size: 0.85rem;
+            border: none; border-radius: 4px;
+            padding: 0.7rem 1.2rem;
+            cursor: pointer; z-index: 500;
+            box-shadow: 0 0 20px rgba(0,255,65,0.5);
+            animation: pulse-green 2s infinite;
+        }
+        #defuse-toggle-btn.active-mode {
+            background: #ff4444; color: #fff;
+            box-shadow: 0 0 20px rgba(255,68,68,0.5);
+        }
+        @keyframes pulse-green { 0%,100%{box-shadow:0 0 15px rgba(0,255,65,0.4)} 50%{box-shadow:0 0 30px rgba(0,255,65,0.8)} }
+
+        /* 解除モードパネル */
+        #defuse-panel {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 800;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            color: #00ff41;
+        }
+        #defuse-panel.active { display: flex; }
+        .defuse-window {
+            background: #050505;
+            border: 2px solid #00ff41;
+            border-radius: 4px;
+            width: 100%; max-width: 500px;
+            box-shadow: 0 0 40px rgba(0,255,65,0.25);
+        }
+        .defuse-titlebar {
+            background: #00ff41; color: #000;
+            padding: 0.4rem 1rem; font-weight: bold; font-size: 0.85rem;
+            display: flex; justify-content: space-between;
+        }
+        .defuse-body { padding: 1.5rem; }
+        .defuse-body p { color: #00aa2a; font-size: 0.8rem; margin-bottom: 1.5rem; line-height: 1.6; }
+        .defuse-field { margin-bottom: 1.2rem; }
+        .defuse-field label { display: block; color: #00aa2a; font-size: 0.75rem; margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+        .defuse-field input {
+            width: 100%; background: #000; border: 1px solid #00ff41;
+            border-radius: 2px; color: #00ff41;
+            font-family: 'Courier New', monospace; font-size: 1rem;
+            padding: 0.6rem 0.8rem; outline: none; box-sizing: border-box;
+            letter-spacing: 0.1em;
+        }
+        .defuse-field input:focus { border-color: #fff; box-shadow: 0 0 8px rgba(0,255,65,0.4); }
+        .defuse-actions { display: flex; gap: 0.8rem; margin-top: 1.2rem; }
+        .defuse-btn-ok {
+            flex: 1; background: #00ff41; color: #000; border: none;
+            padding: 0.7rem; font-family: 'Courier New', monospace;
+            font-weight: bold; font-size: 0.9rem; cursor: pointer; border-radius: 2px;
+        }
+        .defuse-btn-ok:hover { background: #00cc33; }
+        .defuse-btn-cancel {
+            flex: 1; background: transparent; color: #ff4444;
+            border: 1px solid #ff4444; padding: 0.7rem;
+            font-family: 'Courier New', monospace; font-size: 0.9rem;
+            cursor: pointer; border-radius: 2px;
+        }
+        .defuse-btn-cancel:hover { background: rgba(255,68,68,0.1); }
+        .defuse-success { display: none; text-align: center; padding: 1.5rem; }
+        .defuse-success .big-text { font-size: 1.5rem; color: #00ff41; margin-bottom: 0.5rem; }
+        .defuse-success p { color: #00aa2a; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- ターミナルオーバーレイ（PC限定ハッキング演出） -->
+    <div id="terminal-overlay">
+        <div id="terminal-glitch"></div>
+        <div id="terminal-content"><span id="terminal-text"></span><span id="terminal-cursor"></span></div>
+    </div>
+
+    <!-- 解除モードトグルボタン -->
+    <button id="defuse-toggle-btn">[ 解除モード ]</button>
+
+    <!-- 解除モードパネル -->
+    <div id="defuse-panel">
+        <div class="defuse-window">
+            <div class="defuse-titlebar">
+                <span>DEFUSE MODE // AUTHORIZED</span>
+                <span id="defuse-step-label">STEP 1/2</span>
+            </div>
+            <div class="defuse-body">
+                <div id="defuse-step1">
+                    <p>&gt; 解除対象デバイスのシリアルを入力してください。</p>
+                    <div class="defuse-field">
+                        <label>// DEVICE SERIAL :</label>
+                        <input type="text" id="defuse-serial" placeholder="________________" autocomplete="off">
+                    </div>
+                    <div class="defuse-actions">
+                        <button class="defuse-btn-ok" id="defuse-serial-submit">[ VERIFY ]</button>
+                        <button class="defuse-btn-cancel" id="defuse-panel-close">[ CANCEL ]</button>
+                    </div>
+                </div>
+                <div id="defuse-step2" style="display:none;">
+                    <p>&gt; シリアル認証完了。<br>&gt; 暗号を解読し、4桁の解除コードを入力してください。</p>
+                    <div class="defuse-field">
+                        <label>// DEFUSE CODE (4 digits) :</label>
+                        <input type="text" id="defuse-code" maxlength="4" placeholder="____" autocomplete="off" style="text-align:center; font-size:1.5rem; letter-spacing:0.4em;">
+                    </div>
+                    <div class="defuse-actions">
+                        <button class="defuse-btn-ok" id="defuse-code-submit">[ EXECUTE DEFUSE ]</button>
+                        <button class="defuse-btn-cancel" id="defuse-back">[ BACK ]</button>
+                    </div>
+                </div>
+                <div class="defuse-success" id="defuse-success">
+                    <div class="big-text">✓ DEFUSE COMPLETE</div>
+                    <p>爆弾の解除が完了しました。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- オーバーライドモーダル（PC限定） -->
+    <div id="override-modal">
+        <div class="override-window">
+            <div class="override-titlebar">
+                <span>DETONATION_OVERRIDE_v2.6 // UNAUTHORIZED ACCESS</span>
+                <span>█</span>
+            </div>
+            <div class="override-body">
+                <p>&gt; セキュリティレイヤーを突破しました。<br>&gt; オーバーライドコマンドを入力してください。</p>
+                <div class="override-field">
+                    <label>// FIELD_01 : プライマリシステムゲートウェイ</label>
+                    <div class="ip-input-row">
+                        <input type="text" class="ip-seg" id="ip-a" maxlength="3" placeholder="000" autocomplete="off">
+                        <span class="ip-dot">.</span>
+                        <input type="text" class="ip-seg ip-seg-sm" id="ip-b" maxlength="1" placeholder="0" autocomplete="off">
+                        <span class="ip-dot">.</span>
+                        <input type="text" class="ip-seg ip-seg-md" id="ip-c" maxlength="2" placeholder="00" autocomplete="off">
+                        <span class="ip-dot">.</span>
+                        <input type="text" class="ip-seg ip-seg-sm" id="ip-d" maxlength="1" placeholder="0" autocomplete="off">
+                    </div>
+                </div>
+                <div class="override-field">
+                    <label>// FIELD_02 : IPv8カプセル化トンネルエンドポイント</label>
+                    <input type="text" id="tunnel-ep" class="ip-computed" maxlength="5" placeholder="_____" autocomplete="off">
+                </div>
+                <div class="override-field">
+                    <label>// FIELD_03 : エニーキャストDNSリゾルバ</label>
+                    <div class="dns-input-row">
+                        <input type="text" id="dns-a" maxlength="2" placeholder="__" autocomplete="off" style="width:3em;">
+                        <span class="ip-dot" style="margin:0 0.3em;">　</span>
+                        <input type="text" id="dns-b" maxlength="6" placeholder="______" autocomplete="off" style="width:7em;">
+                    </div>
+                </div>
+                <div class="override-actions">
+                    <button class="override-btn-execute" id="override-execute">[ EXECUTE ]</button>
+                    <button class="override-btn-cancel" id="override-cancel">[ ABORT ]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ヘッダー -->
+    <div class="bomb-header-bar">
+        <div class="logo-area">
+            <img src="logo-icon.png" alt="ロゴ">
+            <div>
+                <h1><a href="index.html" style="text-decoration:none;color:inherit;"><span style="color:#5fb85f;">バクダン</span><span style="color:#4a90a4;">解除</span></a></h1>
+                <p class="tagline">プロフェッショナルサービス</p>
+            </div>
+        </div>
+        <button id="back-btn" class="btn-secondary" style="font-size:0.85rem;padding:0.4rem 1rem;">← 戻る</button>
+    </div>
+
+    <!-- 警告バー -->
+    <div class="warning-bar" id="warning-bar"></div>
+
+    <!-- メイン -->
+    <main class="bomb-main">
+        <div class="bomb-left">
+            <p class="bomb-name-display" id="bomb-name">—</p>
+            <div class="time-breakdown" id="time-breakdown">
+                <div class="time-unit">
+                    <div class="t-num" id="tb-h">--</div>
+                    <div class="t-label">HOURS</div>
+                </div>
+                <div class="time-sep">:</div>
+                <div class="time-unit">
+                    <div class="t-num" id="tb-m">--</div>
+                    <div class="t-label">MINUTES</div>
+                </div>
+                <div class="time-sep">:</div>
+                <div class="time-unit">
+                    <div class="t-num" id="tb-s">--</div>
+                    <div class="t-label">SECONDS</div>
+                </div>
+            </div>
+            <div class="status-row">
+                <div class="status-cell">
+                    <div class="s-label">設置者ID</div>
+                    <div class="s-value" id="bomb-owner">—</div>
+                </div>
+                <div class="status-cell">
+                    <div class="s-label">ステータス</div>
+                    <div class="s-value" id="bomb-status-cell">
+                        <span class="status-dot" id="status-dot"></span>
+                        <span id="bomb-status-text">—</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sys-log">
+                <span>[SYS] Device armed. Monitoring active.</span>
+                <span>[SYS] Uplink established — signal nominal.</span>
+                <span class="log-hi">[WARN] Unauthorized access attempt detected.</span>
+                <span>[SYS] Countermeasures engaged.</span>
+                <span class="log-hi">[SYS] Detonation sequence running...</span>
+            </div>
+        </div>
+        <div class="bomb-right">
+            <div class="hint-image-wrap" id="hint-image-wrap">
+                <div class="no-image" id="hint-no-image">// LOCATION HINT IMAGE //</div>
+                <img id="hint-image" style="display:none;" alt="設置場所ヒント">
+            </div>
+            <div class="hint-image-wrap" id="cipher-image-wrap" style="display:none;">
+                <div class="no-image" id="cipher-no-image">// CIPHER IMAGE //</div>
+                <img id="cipher-image" style="display:none;" alt="解除暗号">
+            </div>
+        </div>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+    // ===================================================
+    //  メイン
+    // ===================================================
+    let countdownInterval = null;
+    let defusePollInterval = null;
+    let currentBomb = null;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        const bombId = getURLParameter('id');
+        if (!bombId) {
+            showNotification('爆弾IDが指定されていません', 'error');
+            setTimeout(() => window.history.back(), 2000);
+            return;
+        }
+
+        const isDemo = bombId === 'demo';
+        if (!isDemo && !isUserLoggedIn()) {
+            showNotification('ログインが必要です', 'error');
+            setTimeout(() => redirectToLogin(), 2000);
+            return;
+        }
+
+        await loadBombData(bombId, isDemo);
+
+        document.getElementById('back-btn').addEventListener('click', function () {
+            if (isDemo) redirectToHome();
+            else if (isUserRegistered()) redirectToDashboard();
+            else window.history.back();
+        });
+
+        // 解除モードを30秒ごとにポーリング（スマホでも反映されるように）
+        if (!isDemo) {
+            defusePollInterval = setInterval(() => checkDefuseMode(bombId), 30000);
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (defusePollInterval) clearInterval(defusePollInterval);
+        });
+    });
+
+    // ===================================================
+    //  爆弾データ読み込み
+    // ===================================================
+    async function loadBombData(bombId, isDemo) {
+        let bomb;
+        if (isDemo) {
+            bomb = {
+                id: 'DEMO', name: 'DEMO DEVICE', location: '████████',
+                endTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+                decryptionKey: '████-████-████', status: 'active', owner: '████████',
+                hintImage: '', cipherImage: '', defuseCode: '0000'
+            };
+        } else {
+            bomb = await getBombData(bombId);
+            if (!bomb) {
+                showNotification('指定された爆弾が見つかりません', 'error');
+                setTimeout(() => window.history.back(), 2000);
+                return;
+            }
+        }
+        currentBomb = bomb;
+        displayBombData(bomb);
+        startMainCountdown(bomb.endTime);
+        checkAndRestoreCipherImage();
+        await checkDefuseMode(bombId);
+    }
+
+    function displayBombData(bomb) {
+        document.getElementById('bomb-name').textContent = bomb.name || bomb.id;
+        document.getElementById('bomb-owner').textContent = bomb.owner || '—';
+
+        const isActive = bomb.status === 'active';
+        document.getElementById('bomb-status-text').textContent =
+            bomb.status === 'defused' ? 'DEFUSED' : isActive ? 'ACTIVE' : 'INACTIVE';
+        document.getElementById('status-dot').className =
+            'status-dot ' + (isActive ? 'active' : 'inactive');
+
+        if (bomb.hintImage) {
+            document.getElementById('hint-image').src = bomb.hintImage;
+            document.getElementById('hint-image').style.display = 'block';
+            document.getElementById('hint-no-image').style.display = 'none';
+        }
+    }
+
+    // ===================================================
+    //  カウントダウン
+    // ===================================================
+    function startMainCountdown(endTime) {
+        if (currentBomb && currentBomb.status !== 'active') {
+            updateBreakdown(0);
+            return;
+        }
+        function tick() {
+            const remaining = new Date(endTime).getTime() - Date.now();
+            if (remaining <= 0) {
+                updateBreakdown(0);
+                document.getElementById('time-breakdown').classList.add('critical');
+                showWarning('爆発時刻に到達しました！');
+                clearInterval(countdownInterval);
+                return;
+            }
+            updateBreakdown(remaining);
+            if (remaining < 5 * 60 * 1000) {
+                document.getElementById('time-breakdown').classList.add('critical');
+                showWarning('緊急：残り5分を切りました！');
+            } else if (remaining < 30 * 60 * 1000) {
+                showWarning('注意：残り30分を切りました。');
+            }
+        }
+        tick();
+        countdownInterval = setInterval(tick, 1000);
+    }
+
+    function updateBreakdown(ms) {
+        const total = Math.max(0, Math.floor(ms / 1000));
+        document.getElementById('tb-h').textContent = String(Math.floor(total / 3600)).padStart(2, '0');
+        document.getElementById('tb-m').textContent = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+        document.getElementById('tb-s').textContent = String(total % 60).padStart(2, '0');
+    }
+
+    function showWarning(msg) {
+        const bar = document.getElementById('warning-bar');
+        bar.textContent = '⚠️ ' + msg;
+        bar.style.display = 'block';
+    }
+
+    // ===================================================
+    //  解除モード（Supabaseで同期）
+    // ===================================================
+    async function checkDefuseMode(bombId) {
+        if (bombId === 'demo') return;
+        try {
+            const enabled = await isDefuseModeEnabled(bombId);
+            if (enabled) {
+                showDefuseToggle();
+            }
+        } catch (e) {
+            console.warn('解除モード確認失敗:', e);
+        }
+    }
+
+    function checkAndRestoreCipherImage() {
+        if (currentBomb && localStorage.getItem('detonation_defuse_step2_' + currentBomb.id) === '1') {
+            showCipherImage();
+        }
+    }
+
+    function showDefuseToggle() {
+        document.getElementById('defuse-toggle-btn').style.display = 'block';
+    }
+
+    document.getElementById('defuse-toggle-btn').addEventListener('click', function () {
+        const panel = document.getElementById('defuse-panel');
+        if (panel.classList.contains('active')) {
+            closeDefusePanel();
+            this.classList.remove('active-mode');
+            this.textContent = '[ 解除モード ]';
+        } else {
+            openDefusePanel();
+            this.classList.add('active-mode');
+            this.textContent = '[ 解除モード解除 ]';
+        }
+    });
+
+    function openDefusePanel() {
+        const step2Ready = currentBomb &&
+            localStorage.getItem('detonation_defuse_step2_' + currentBomb.id) === '1';
+        resetDefusePanel();
+        document.getElementById('defuse-panel').classList.add('active');
+        if (step2Ready) {
+            document.getElementById('defuse-step1').style.display = 'none';
+            document.getElementById('defuse-step2').style.display = 'block';
+            document.getElementById('defuse-step-label').textContent = 'STEP 2/2';
+            document.getElementById('defuse-code').focus();
+        } else {
+            document.getElementById('defuse-serial').focus();
+        }
+    }
+
+    function closeDefusePanel() {
+        document.getElementById('defuse-panel').classList.remove('active');
+        document.getElementById('defuse-toggle-btn').classList.remove('active-mode');
+        document.getElementById('defuse-toggle-btn').textContent = '[ 解除モード ]';
+    }
+
+    function resetDefusePanel() {
+        document.getElementById('defuse-step1').style.display = 'block';
+        document.getElementById('defuse-step2').style.display = 'none';
+        document.getElementById('defuse-success').style.display = 'none';
+        document.getElementById('defuse-step-label').textContent = 'STEP 1/2';
+        document.getElementById('defuse-serial').value = '';
+        if (document.getElementById('defuse-code'))
+            document.getElementById('defuse-code').value = '';
+    }
+
+    // シリアル検証
+    document.getElementById('defuse-serial-submit').addEventListener('click', function () {
+        const serial = document.getElementById('defuse-serial').value.trim();
+        if (!currentBomb || !serial) return;
+        if (serial === currentBomb.id) {
+            localStorage.setItem('detonation_defuse_step2_' + currentBomb.id, '1');
+            closeDefusePanel();
+            showCipherImage();
+            showNotification('シリアル認証完了 — 暗号を解読してください', 'info');
+        } else {
+            showNotification('シリアル認証失敗', 'error');
+        }
+    });
+
+    function showCipherImage() {
+        document.getElementById('hint-image-wrap').style.display = 'none';
+        document.getElementById('cipher-image-wrap').style.display = 'block';
+        if (currentBomb && currentBomb.cipherImage) {
+            document.getElementById('cipher-image').src = currentBomb.cipherImage;
+            document.getElementById('cipher-image').style.display = 'block';
+            document.getElementById('cipher-no-image').style.display = 'none';
+        }
+    }
+
+    // 4桁コード検証
+    document.getElementById('defuse-code-submit').addEventListener('click', async function () {
+        const code = document.getElementById('defuse-code').value.trim();
+        if (!currentBomb || !code) return;
+        if (code === String(currentBomb.defuseCode || '')) {
+            document.getElementById('defuse-step2').style.display = 'none';
+            document.getElementById('defuse-success').style.display = 'block';
+            document.getElementById('defuse-step-label').textContent = 'COMPLETE';
+            document.getElementById('bomb-status-text').textContent = 'DEFUSED';
+            document.getElementById('status-dot').className = 'status-dot inactive';
+            // localStorageのSTEP2フラグをクリア
+            localStorage.removeItem('detonation_defuse_step2_' + currentBomb.id);
+        } else {
+            showNotification('コードが正しくありません', 'error');
+        }
+    });
+
+    document.getElementById('defuse-panel-close').addEventListener('click', closeDefusePanel);
+    document.getElementById('defuse-back').addEventListener('click', function () {
+        document.getElementById('defuse-step2').style.display = 'none';
+        document.getElementById('defuse-step1').style.display = 'block';
+        document.getElementById('defuse-step-label').textContent = 'STEP 1/2';
+    });
+    document.getElementById('defuse-serial').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('defuse-serial-submit').click();
+    });
+    document.getElementById('defuse-code').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('defuse-code-submit').click();
+    });
+
+    // ===================================================
+    //  PC限定：F1×2 → ターミナル → オーバーライドモーダル
+    // ===================================================
+    let f1Count = 0, f1Timer = null, termActive = false;
+    let stepIndex = 0, charIndex = 0;
+
+    const HACK_STEPS = [
+        {
+            cmd: 'nmap -sV --script vuln 192.168.11.0/24',
+            result:
+`  Host: 192.168.11.47 (detonation.local)
+  PORT     STATE  SERVICE   VERSION
+  22/tcp   open   ssh       OpenSSH 8.9
+  443/tcp  open   https     nginx 1.22.1
+  8443/tcp open   https-alt DETONATION/2.6.0
+  VULN: CVE-2024-7749 — Remote code execution [CRITICAL]`
+        },
+        {
+            cmd: 'exploit --cve CVE-2024-7749 --target 192.168.11.47:8443',
+            result:
+`  [*] Sending malformed TLS handshake...
+  [*] Heap overflow triggered at offset 0x3f8
+  [*] ROP chain injected
+  [+] Shell obtained: uid=0(root) gid=0(root)
+  [+] Connected to detonation.local as root`
+        },
+        {
+            cmd: 'mysql -h localhost -u root --skip-password -e "SELECT * FROM bombs"',
+            result:
+`  +----------+------------------+---------+---------------------+
+  | id       | location         | status  | decryption_key      |
+  +----------+------------------+---------+---------------------+
+  | 3vdjcq   | ████████         | ACTIVE  | ████-████-████      |
+  | uv6blp   | ████████         | ACTIVE  | ████-████-████      |
+  +----------+------------------+---------+---------------------+`
+        },
+        {
+            cmd: 'inject-override --target detonation.local --escalate ADMIN',
+            result:
+`  [*] Patching auth token...
+  [*] Bypassing 2FA...
+  ██████████████████████████████████████████
+    ACCESS GRANTED — OVERRIDE MODE ACTIVE
+  ██████████████████████████████████████████`
+        },
+    ];
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'F1') {
+            e.preventDefault();
+            f1Count++;
+            clearTimeout(f1Timer);
+            if (f1Count >= 2) { f1Count = 0; startTerminal(); }
+            else f1Timer = setTimeout(() => { f1Count = 0; }, 800);
+            return;
+        }
+        if (termActive) { e.preventDefault(); advanceChar(); return; }
+        if (e.key === 'Escape') closeOverrideModal();
+    });
+
+    function startTerminal() {
+        stepIndex = 0; charIndex = 0;
+        document.getElementById('terminal-text').textContent =
+            'DETONATION SYSTEM v2.6.0 // SECURE SHELL\n' +
+            '────────────────────────────────────────\n\n';
+        document.getElementById('terminal-overlay').classList.add('active');
+        spawnGlitchChars();
+        termActive = true;
+        appendText('> ');
+    }
+
+    function advanceChar() {
+        if (stepIndex >= HACK_STEPS.length) {
+            termActive = false;
+            setTimeout(() => {
+                document.getElementById('terminal-overlay').classList.remove('active');
+                openOverrideModal();
+            }, 400);
+            return;
+        }
+        const step = HACK_STEPS[stepIndex];
+        if (charIndex < step.cmd.length) {
+            appendText(step.cmd[charIndex]); charIndex++;
+        } else {
+            appendText('\n' + step.result + '\n\n');
+            stepIndex++; charIndex = 0;
+            if (stepIndex < HACK_STEPS.length) appendText('> ');
+        }
+    }
+
+    function appendText(str) {
+        document.getElementById('terminal-text').textContent += str;
+    }
+
+    function spawnGlitchChars() {
+        const glitch = document.getElementById('terminal-glitch');
+        glitch.innerHTML = '';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*!?/\\|[]{}';
+        for (let i = 0; i < 60; i++) {
+            setTimeout(() => {
+                const el = document.createElement('span');
+                el.className = 'glitch-char';
+                el.textContent = chars[Math.floor(Math.random() * chars.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top  = Math.random() * 100 + 'vh';
+                const dur = 0.5 + Math.random() * 1;
+                el.style.animationDuration = dur + 's';
+                el.style.fontSize = (0.7 + Math.random() * 0.8) + 'rem';
+                glitch.appendChild(el);
+                setTimeout(() => el.remove(), dur * 1000);
+            }, Math.random() * 3000);
+        }
+    }
+
+    // オーバーライドモーダル
+    function computeTunnel(ip) {
+        if (ip === '328.4.12.5') return '32505';
+        if (!ip) return '';
+        let h = 0;
+        for (let i = 0; i < ip.length; i++) h = (h * 31 + ip.charCodeAt(i)) & 0xFFFFFF;
+        return String(10000 + (h % 89999)).slice(0, 5);
+    }
+
+    function getIP() {
+        const a = document.getElementById('ip-a').value;
+        const b = document.getElementById('ip-b').value;
+        const c = document.getElementById('ip-c').value;
+        const d = document.getElementById('ip-d').value;
+        return { a, b, c, d, full: `${a}.${b}.${c}.${d}` };
+    }
+
+    function updateTunnel() {
+        const ep = document.getElementById('tunnel-ep');
+        const { a, b, c, d } = getIP();
+        if (a.length===3 && b.length===1 && c.length===2 && d.length===1) {
+            if (!ep.dataset.manualEdit) { ep.value = computeTunnel(getIP().full); ep.classList.add('computed'); }
+        } else {
+            if (!ep.dataset.manualEdit) { ep.value = ''; ep.classList.remove('computed'); }
+        }
+    }
+
+    ['ip-a','ip-b','ip-c','ip-d'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            const nexts = { 'ip-a':'ip-b', 'ip-b':'ip-c', 'ip-c':'ip-d' };
+            const maxLen = { 'ip-a':3, 'ip-b':1, 'ip-c':2, 'ip-d':1 };
+            if (this.value.length === maxLen[id] && nexts[id])
+                document.getElementById(nexts[id]).focus();
+            updateTunnel();
+        });
+    });
+
+    const tunnelEl = document.getElementById('tunnel-ep');
+    tunnelEl.addEventListener('input', function() {
+        if (this.value === '') { delete this.dataset.manualEdit; updateTunnel(); }
+        else this.dataset.manualEdit = '1';
+    });
+
+    document.getElementById('dns-a').addEventListener('input', function() {
+        if (this.value.length === 2) document.getElementById('dns-b').focus();
+    });
+
+    function openOverrideModal() {
+        document.getElementById('override-modal').classList.add('active');
+        document.getElementById('ip-a').focus();
+    }
+
+    function closeOverrideModal() {
+        document.getElementById('override-modal').classList.remove('active');
+        const ep = document.getElementById('tunnel-ep');
+        delete ep.dataset.manualEdit;
+        ['ip-a','ip-b','ip-c','ip-d','tunnel-ep','dns-a','dns-b'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        ep.classList.remove('computed');
+    }
+
+    document.getElementById('override-cancel').addEventListener('click', closeOverrideModal);
+
+    document.getElementById('override-execute').addEventListener('click', async function () {
+        const ip   = getIP().full;
+        const ep   = document.getElementById('tunnel-ep').value.trim();
+        const dnsA = document.getElementById('dns-a').value.trim().toUpperCase();
+        const dnsB = document.getElementById('dns-b').value.trim().toUpperCase();
+        const valid = (ip === '328.4.12.5') && (ep === '32505') && (dnsA === 'TP') && (dnsB === 'RS0221');
+
+        if (!valid) {
+            showNotification('コマンドエラー：認証に失敗しました', 'error');
+            return;
+        }
+
+        closeOverrideModal();
+
+        // Supabaseに解除モードONを書き込む
+        try {
+            await supabaseGet; // shared.jsのsupabaseGetを使う
+            const bombId = currentBomb ? currentBomb.id : null;
+            if (bombId) {
+                await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': window._SUPABASE_KEY,
+                        'Authorization': `Bearer ${window._SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({
+                        key: `defuse_mode_${bombId}`,
+                        value: 'true',
+                        updated_at: new Date().toISOString()
+                    })
+                });
+            }
+        } catch(e) {
+            console.warn('Supabase書き込み失敗:', e);
+        }
+
+        showDefuseToggle();
+        showNotification('オーバーライドコマンドを送信しました — 解除モードが解放されました', 'info');
+    });
+    </script>
+</body>
+</html>
