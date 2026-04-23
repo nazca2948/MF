@@ -59,13 +59,6 @@
                     サービスご利用のため、以下の情報を入力してください。<br>
                     <small>※入力いただいた情報は厳重に管理いたします。</small>
                 </p>
-                <!-- 別端末からのログイン時のスキップリンク -->
-                <div id="skip-registration" style="display:none; margin-top:1rem; padding:1rem; background:var(--background-section); border-radius:var(--radius-md); border:1px solid var(--border-color);">
-                    <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0.5rem;">別の端末からのアクセスですか？</p>
-                    <a href="javascript:void(0)" id="skip-link" style="color:var(--primary-color); font-weight:600; text-decoration:none;">
-                        会員情報入力をスキップしてダッシュボードへ →
-                    </a>
-                </div>
             </div>
                 
                 <form id="register-form" onsubmit="return false;" style="background: var(--background); border-radius: var(--radius-lg); box-shadow: 0 4px 30px var(--shadow); padding: 2.5rem;">
@@ -332,15 +325,6 @@
             const skipLink = document.getElementById('skip-registration');
             if (skipLink) skipLink.style.display = 'block';
 
-            // スキップリンク（別端末からのアクセス時）
-            const skipLinkEl = document.getElementById('skip-link');
-            if (skipLinkEl) {
-                skipLinkEl.addEventListener('click', function() {
-                    setUserRegistered(true);
-                    redirectToDashboard();
-                });
-            }
-
             const registerForm = document.getElementById('register-form');
             const submitBtn = document.getElementById('submit-btn');
             const studentEffortField = document.getElementById('studentEffort');
@@ -486,13 +470,10 @@
             });
 
             // 実際の登録完了処理
-            function completeRegistration() {
-                console.log('登録完了処理開始');
-                
+            async function completeRegistration() {
                 // フォームデータ収集
                 const formData = new FormData(registerForm);
                 const registrationData = {};
-                
                 for (let [key, value] of formData.entries()) {
                     if (registerForm.elements[key] && registerForm.elements[key].type === 'checkbox') {
                         registrationData[key] = registerForm.elements[key].checked;
@@ -501,30 +482,28 @@
                     }
                 }
 
-                console.log('登録データ:', registrationData);
-
-                // 現在のセッションにユーザー情報を追加
+                // セッションに名前だけ保存（ダッシュボードの挨拶用）
                 const currentSession = getUserSession();
-                const updatedSession = {
-                    ...currentSession,
-                    ...registrationData,
-                    registrationDate: new Date().toISOString()
-                };
+                setUserSession({ ...currentSession, fullName: registrationData.fullName });
 
-                console.log('セッション更新:', updatedSession);
+                // Supabaseのuser_registeredをtrueに
+                try {
+                    await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': window._SUPABASE_KEY,
+                            'Authorization': `Bearer ${window._SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-duplicates,return=minimal'
+                        },
+                        body: JSON.stringify({ key: 'user_registered', value: 'true', updated_at: new Date().toISOString() })
+                    });
+                } catch(e) {
+                    console.warn('Supabase更新失敗:', e);
+                }
 
-                // セッション情報を更新
-                setUserSession(updatedSession);
-                setUserRegistered(true);
-
-                console.log('登録完了');
                 showNotification('会員登録が完了しました！', 'info');
-                
-                // ダッシュボードへリダイレクト
-                setTimeout(() => {
-                    console.log('ダッシュボードへリダイレクト');
-                    redirectToDashboard();
-                }, 1500);
+                setTimeout(() => redirectToDashboard(), 1500);
             } // completeRegistration 関数の終了
 
             // 年齢制限チェック（生年月日入力時）

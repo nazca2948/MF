@@ -105,12 +105,14 @@
                         loginTime: new Date().toISOString()
                     });
                     showNotification('ログインしました', 'info');
-                    setTimeout(() => {
-                        // 初回（会員情報未入力）のみregisterへ、それ以降はdashboardへ
-                        if (!isUserRegistered()) {
+
+                    setTimeout(async () => {
+                        try {
+                            const val = await getGameState('user_registered');
+                            window.location.href = val === 'true' ? 'dashboard.html' : 'register.html';
+                        } catch(e) {
+                            // Supabase失敗時はregisterへ（安全側に倒す）
                             window.location.href = 'register.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
                         }
                     }, 1000);
                 } else {

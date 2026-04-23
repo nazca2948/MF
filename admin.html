@@ -540,6 +540,17 @@ function renderBombGrid() {
             <div class="${isActive ? 'bomb-timer' : 'bomb-timer inactive-timer'}" id="${timerId}">
                 ${isActive ? '--:--:--' : 'STANDBY'}
             </div>
+            ${isActive ? `
+            <div style="display:flex;gap:0.4rem;margin-bottom:0.5rem;">
+                <button class="btn" style="flex:1;background:transparent;color:#00ff41;border:1px solid #00ff41;font-size:0.72rem;padding:0.4rem;"
+                    onclick="adjustTimer('${b.id}', 5)">+5分</button>
+                <button class="btn" style="flex:1;background:transparent;color:#00ff41;border:1px solid #00ff41;font-size:0.72rem;padding:0.4rem;"
+                    onclick="adjustTimer('${b.id}', 1)">+1分</button>
+                <button class="btn" style="flex:1;background:transparent;color:#ff4444;border:1px solid #ff4444;font-size:0.72rem;padding:0.4rem;"
+                    onclick="adjustTimer('${b.id}', -1)">-1分</button>
+                <button class="btn" style="flex:1;background:transparent;color:#ff4444;border:1px solid #ff4444;font-size:0.72rem;padding:0.4rem;"
+                    onclick="adjustTimer('${b.id}', -5)">-5分</button>
+            </div>` : ''}
             <button class="btn btn-arm"
                 onclick="confirmArm('${b.id}', '${b.name || b.id}')"
                 ${isActive || isDefused ? 'disabled' : ''}>
@@ -647,6 +658,19 @@ async function toggleDefuseMode(bombId, currentlyOn) {
     }
 }
 
+async function adjustTimer(bombId, minutes) {
+    try {
+        const bomb = bombs.find(b => b.id === bombId);
+        if (!bomb || !bomb.end_time) return;
+        const newEndTime = new Date(new Date(bomb.end_time).getTime() + minutes * 60 * 1000).toISOString();
+        await sbUpdate('bombs', { id: bombId }, { end_time: newEndTime });
+        addLog(`タイマー調整: ${bombId} ${minutes > 0 ? '+' : ''}${minutes}分`, minutes > 0 ? 'hi' : 'warn');
+        await loadAll();
+    } catch (err) {
+        addLog(`タイマー調整エラー: ${err.message}`, 'err');
+    }
+}
+
 async function resetAll() {
     try {
         for (const b of bombs) {
@@ -654,7 +678,9 @@ async function resetAll() {
             await sbUpsert('game_state', { key: `defuse_mode_${b.id}`, value: 'false', updated_at: new Date().toISOString() });
             await sbUpsert('game_state', { key: `defuse_step2_${b.id}`, value: 'false', updated_at: new Date().toISOString() });
         }
-        addLog('全データ初期化完了', 'warn');
+        // 会員情報登録フラグもリセット（次回公演で再度入力させる）
+        await sbUpsert('game_state', { key: 'user_registered', value: 'false', updated_at: new Date().toISOString() });
+        addLog('全データ初期化完了（user_registeredもリセット）', 'warn');
         await loadAll();
     } catch (err) {
         addLog(`初期化エラー: ${err.message}`, 'err');
