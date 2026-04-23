@@ -46,13 +46,6 @@
                     </h3>
                     <div id="active-bombs" class="dashboard-grid"></div>
                 </section>
-
-                <section id="inactive-section" style="margin-bottom:3rem;display:none;">
-                    <h3 style="color:var(--text-primary);margin-bottom:2rem;padding-bottom:0.5rem;border-bottom:2px solid var(--accent-color);">
-                        🔒 待機中の爆弾
-                    </h3>
-                    <div id="inactive-bombs" class="dashboard-grid"></div>
-                </section>
             </div>
 
             <div id="error-msg" style="display:none;text-align:center;padding:3rem;color:var(--danger-red);">
@@ -118,17 +111,9 @@
             countdownIntervals.forEach(clearInterval);
             countdownIntervals = [];
 
-            const activeBombs   = bombList.filter(b => b.status === 'active' || b.status === 'defused');
-            const inactiveBombs = bombList.filter(b => b.status === 'inactive');
-
+            // active と defused のみ表示（inactiveは完全に隠す）
+            const activeBombs = bombList.filter(b => b.status === 'active' || b.status === 'defused');
             displayBombs(activeBombs, 'active-bombs', true);
-
-            if (inactiveBombs.length > 0) {
-                document.getElementById('inactive-section').style.display = 'block';
-                displayBombs(inactiveBombs, 'inactive-bombs', false);
-            } else {
-                document.getElementById('inactive-section').style.display = 'none';
-            }
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('bombs-container').style.display = 'block';
@@ -180,7 +165,7 @@
                 <div class="bomb-details">
                     <div class="bomb-detail">
                         <span class="label">設置場所:</span>
-                        <span class="value">${bomb.location || '—'}</span>
+                        <span class="value">山梨県富士河口湖町</span>
                     </div>
                     <div class="bomb-detail">
                         <span class="label">設置者ID:</span>

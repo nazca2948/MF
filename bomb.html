@@ -543,19 +543,47 @@
                     </div>
                 </div>
             </div>
-            <div class="sys-log">
-                <span>[SYS] Device armed. Monitoring active.</span>
-                <span>[SYS] Uplink established — signal nominal.</span>
-                <span class="log-hi">[WARN] Unauthorized access attempt detected.</span>
-                <span>[SYS] Countermeasures engaged.</span>
-                <span class="log-hi">[SYS] Detonation sequence running...</span>
+            <!-- 設置場所 -->
+            <div style="
+                border: 1px solid rgba(255,68,68,0.3);
+                border-radius: var(--radius-md);
+                padding: 1.2rem 1.5rem;
+                background: rgba(255,68,68,0.05);
+            ">
+                <div style="
+                    font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+                    color: rgba(255,255,255,0.45);
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    margin-bottom: 0.6rem;
+                ">設置場所</div>
+                <div id="bomb-location" style="
+                    font-family: var(--font-mono);
+                    font-size: clamp(0.95rem, 2vw, 1.2rem);
+                    color: var(--text-light);
+                    line-height: 1.6;
+                    letter-spacing: 0.03em;
+                ">—</div>
             </div>
         </div>
         <div class="bomb-right">
+            <!-- ロック中表示（シリアル突破前） -->
             <div class="hint-image-wrap" id="hint-image-wrap">
-                <div class="no-image" id="hint-no-image">// LOCATION HINT IMAGE //</div>
-                <img id="hint-image" style="display:none;" alt="設置場所ヒント">
+                <div style="
+                    text-align: center;
+                    padding: 2rem;
+                    color: rgba(255,255,255,0.35);
+                    font-family: var(--font-mono);
+                    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+                    line-height: 1.9;
+                ">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.4;">🔒</div>
+                    ロック中<br>
+                    爆弾のシリアルコードを入力すると<br>
+                    解除パスワード用暗号が表示されます。
+                </div>
             </div>
+            <!-- シリアル突破後：暗号画像 -->
             <div class="hint-image-wrap" id="cipher-image-wrap" style="display:none;">
                 <div class="no-image" id="cipher-no-image">// CIPHER IMAGE //</div>
                 <img id="cipher-image" style="display:none;" alt="解除暗号">
@@ -621,9 +649,10 @@
         const key = payload.new && payload.new.key;
         const val = payload.new && payload.new.value;
 
-        // 解除モードON → トグルボタン表示
+        // 解除モードON → トグルボタン表示 + 設置場所ヒント表示
         if (key === `defuse_mode_${bombId}` && val === 'true') {
             showDefuseToggle();
+            revealLocationHint();
         }
 
         // シリアル突破フラグ → 暗号画像に切り替え
@@ -663,16 +692,22 @@
         document.getElementById('bomb-name').textContent = bomb.name || bomb.id;
         document.getElementById('bomb-owner').textContent = bomb.owner || '—';
 
+        // 設置場所：通常は固定表示
+        document.getElementById('bomb-location').textContent = '山梨県富士河口湖町';
+
         const isActive = bomb.status === 'active';
         document.getElementById('bomb-status-text').textContent =
             bomb.status === 'defused' ? 'DEFUSED' : isActive ? 'ACTIVE' : 'INACTIVE';
         document.getElementById('status-dot').className =
             'status-dot ' + (isActive ? 'active' : 'inactive');
+    }
 
-        if (bomb.hintImage) {
-            document.getElementById('hint-image').src = bomb.hintImage;
-            document.getElementById('hint-image').style.display = 'block';
-            document.getElementById('hint-no-image').style.display = 'none';
+    // 解除モード有効時：設置場所をヒントに切り替え
+    function revealLocationHint() {
+        if (currentBomb && currentBomb.location) {
+            document.getElementById('bomb-location').textContent = currentBomb.location;
+            document.getElementById('bomb-location').style.color = '#00ff41';
+            document.getElementById('bomb-location').style.textShadow = '0 0 10px rgba(0,255,65,0.4)';
         }
     }
 
@@ -727,6 +762,7 @@
             const enabled = await isDefuseModeEnabled(bombId);
             if (enabled) {
                 showDefuseToggle();
+                revealLocationHint();
             }
         } catch (e) {
             console.warn('解除モード確認失敗:', e);
