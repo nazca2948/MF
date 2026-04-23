@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>爆弾ステータス | バクダン解除 - 株式会社DETONATION</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         html, body { height: 100%; }
         body {
@@ -568,8 +569,13 @@
     //  メイン
     // ===================================================
     let countdownInterval = null;
-    let defusePollInterval = null;
+    let realtimeChannel = null;
     let currentBomb = null;
+
+    // Supabase JS SDK（リアルタイム用）
+    const _supabaseClient = window.supabase
+        ? window.supabase.createClient(window._SUPABASE_URL, window._SUPABASE_KEY)
+        : null;
 
     document.addEventListener('DOMContentLoaded', async function () {
         const bombId = getURLParameter('id');
@@ -590,20 +596,41 @@
 
         document.getElementById('back-btn').addEventListener('click', function () {
             if (isDemo) redirectToHome();
-            else if (isUserRegistered()) redirectToDashboard();
-            else window.history.back();
+            else redirectToDashboard();
         });
 
-        // 解除モードを30秒ごとにポーリング（スマホでも反映されるように）
-        if (!isDemo) {
-            defusePollInterval = setInterval(() => checkDefuseMode(bombId), 30000);
+        // リアルタイム購読（game_stateの変化を即反映）
+        if (!isDemo && _supabaseClient) {
+            realtimeChannel = _supabaseClient
+                .channel('game_state_changes')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'game_state' },
+                    (payload) => handleRealtimeUpdate(payload, bombId)
+                )
+                .subscribe();
         }
 
         window.addEventListener('beforeunload', () => {
             if (countdownInterval) clearInterval(countdownInterval);
-            if (defusePollInterval) clearInterval(defusePollInterval);
+            if (realtimeChannel) _supabaseClient.removeChannel(realtimeChannel);
         });
     });
+
+    // リアルタイム更新ハンドラ
+    function handleRealtimeUpdate(payload, bombId) {
+        const key = payload.new && payload.new.key;
+        const val = payload.new && payload.new.value;
+
+        // 解除モードON → トグルボタン表示
+        if (key === `defuse_mode_${bombId}` && val === 'true') {
+            showDefuseToggle();
+        }
+
+        // シリアル突破フラグ → 暗号画像に切り替え
+        if (key === `defuse_step2_${bombId}` && val === 'true') {
+            showCipherImage();
+        }
+    }
 
     // ===================================================
     //  爆弾データ読み込み
@@ -706,9 +733,13 @@
         }
     }
 
-    function checkAndRestoreCipherImage() {
-        if (currentBomb && localStorage.getItem('detonation_defuse_step2_' + currentBomb.id) === '1') {
-            showCipherImage();
+    async function checkAndRestoreCipherImage() {
+        if (!currentBomb) return;
+        try {
+            const val = await getGameState(`defuse_step2_${currentBomb.id}`);
+            if (val === 'true') showCipherImage();
+        } catch(e) {
+            console.warn('暗号画像状態確認失敗:', e);
         }
     }
 
@@ -729,9 +760,12 @@
         }
     });
 
-    function openDefusePanel() {
-        const step2Ready = currentBomb &&
-            localStorage.getItem('detonation_defuse_step2_' + currentBomb.id) === '1';
+    async function openDefusePanel() {
+        let step2Ready = false;
+        try {
+            const val = await getGameState(`defuse_step2_${currentBomb ? currentBomb.id : ''}`);
+            step2Ready = val === 'true';
+        } catch(e) {}
         resetDefusePanel();
         document.getElementById('defuse-panel').classList.add('active');
         if (step2Ready) {
@@ -761,11 +795,29 @@
     }
 
     // シリアル検証
-    document.getElementById('defuse-serial-submit').addEventListener('click', function () {
+    document.getElementById('defuse-serial-submit').addEventListener('click', async function () {
         const serial = document.getElementById('defuse-serial').value.trim();
         if (!currentBomb || !serial) return;
         if (serial === currentBomb.id) {
-            localStorage.setItem('detonation_defuse_step2_' + currentBomb.id, '1');
+            // Supabaseにシリアル突破フラグを書き込み → 全端末に即反映
+            try {
+                await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': window._SUPABASE_KEY,
+                        'Authorization': `Bearer ${window._SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({
+                        key: `defuse_step2_${currentBomb.id}`,
+                        value: 'true',
+                        updated_at: new Date().toISOString()
+                    })
+                });
+            } catch(e) {
+                console.warn('Supabase書き込み失敗:', e);
+            }
             closeDefusePanel();
             showCipherImage();
             showNotification('シリアル認証完了 — 暗号を解読してください', 'info');
@@ -794,8 +846,30 @@
             document.getElementById('defuse-step-label').textContent = 'COMPLETE';
             document.getElementById('bomb-status-text').textContent = 'DEFUSED';
             document.getElementById('status-dot').className = 'status-dot inactive';
-            // localStorageのSTEP2フラグをクリア
-            localStorage.removeItem('detonation_defuse_step2_' + currentBomb.id);
+
+            // Supabaseのstep2フラグをリセット
+            try {
+                await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': window._SUPABASE_KEY,
+                        'Authorization': `Bearer ${window._SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({
+                        key: `defuse_step2_${currentBomb.id}`,
+                        value: 'false',
+                        updated_at: new Date().toISOString()
+                    })
+                });
+            } catch(e) {
+                console.warn('フラグリセット失敗:', e);
+            }
+
+            // 3秒後にダッシュボードへ
+            showNotification('爆弾を解除しました', 'info');
+            setTimeout(() => redirectToDashboard(), 3000);
         } else {
             showNotification('コードが正しくありません', 'error');
         }
