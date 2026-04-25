@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ID・パスワードの確認 | バクダン解除 - 株式会社DETONATION</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section
+      style="
+        background: var(--background);
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--border-color);
+      "
+    >
+      <div class="container">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+          "
+        >
+          <div
+            class="logo"
+            style="display: flex; align-items: center; gap: 1rem"
+          >
+            <img
+              src="logo-icon.png"
+              alt="バクダン解除アイコン"
+              style="
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+              "
+            />
+            <div>
+              <h1
+                style="
+                  font-family: var(--font-display);
+                  font-weight: bold;
+                  font-size: clamp(1.8rem, 4vw, 2.2rem);
+                  margin: 0;
+                "
+              >
+                <a
+                  href="index.html"
+                  style="text-decoration: none; color: inherit"
+                >
+                  <span style="color: #5fb85f">バクダン</span
+                  ><span style="color: #4a90a4">解除</span>
+                </a>
+              </h1>
+              <p
+                class="tagline"
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin: 0.2rem 0 0 0;
+                "
+              >
+                プロフェッショナルサービス
+              </p>
+            </div>
+          </div>
+          <nav style="display: flex; align-items: center; gap: 2rem">
+            <a href="login.html" class="nav-link">ログインへ戻る</a>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <main
+      style="
+        min-height: calc(100vh - 100px);
+        background: var(--background-section);
+        padding: 4rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="width: 100%; max-width: 420px">
+        <div style="text-align: center; margin-bottom: 2.5rem">
+          <h2
+            style="
+              font-size: var(--font-size-3xl);
+              color: var(--text-primary);
+              margin-bottom: 0.5rem;
+            "
+          >
+            ID・パスワードの確認
+          </h2>
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: var(--font-size-base);
+            "
+          >
+            ご登録の情報を入力してください
+          </p>
+        </div>
+
+        <div
+          style="
+            background: var(--background);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 30px var(--shadow);
+            padding: 2.5rem;
+          "
+        >
+          <div class="form-group">
+            <label for="fullname">本名</label>
+            <input
+              type="text"
+              id="fullname"
+              placeholder="氏名を入力してください"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="birthday">生年月日</label>
+            <input type="date" id="birthday" />
+          </div>
+          <button
+            id="submit-btn"
+            class="login-btn"
+            style="
+              width: 100%;
+              padding: 1rem;
+              font-size: var(--font-size-lg);
+              margin-top: 0.5rem;
+              min-height: var(--button-min-size);
+            "
+          >
+            確認する
+          </button>
+
+          <div
+            style="
+              text-align: center;
+              margin-top: 1.5rem;
+              padding-top: 1.5rem;
+              border-top: 1px solid var(--border-color);
+            "
+          >
+            <a
+              href="login.html"
+              style="
+                color: var(--primary-color);
+                text-decoration: none;
+                font-size: var(--font-size-sm);
+                font-weight: 500;
+              "
+            >
+              ログインページへ戻る
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+      // ===== ここを書き換えてください =====
+      const CORRECT_NAME = "三井優雅"; // 正しい本名
+      const CORRECT_BIRTHDAY = "2002-11-12"; // 正しい生年月日 (YYYY-MM-DD)
+      const USER_ID = "bh00075"; // 教えるID
+      // =====================================
+
+      document
+        .getElementById("submit-btn")
+        .addEventListener("click", function () {
+          const name = document.getElementById("fullname").value.trim();
+          const birthday = document.getElementById("birthday").value;
+
+          if (!name || !birthday) {
+            showNotification("すべての項目を入力してください", "error");
+            return;
+          }
+
+          if (name === CORRECT_NAME && birthday === CORRECT_BIRTHDAY) {
+            alert(
+              `ご登録情報が確認できました。\n\nユーザーID：${USER_ID}\nパスワードは後日、再登録用のハガキを郵送いたします。`,
+            );
+          } else {
+            showNotification("入力された情報が一致しません", "error");
+          }
+        });
+
+      document
+        .getElementById("fullname")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") document.getElementById("submit-btn").click();
+        });
+      document
+        .getElementById("birthday")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") document.getElementById("submit-btn").click();
+        });
+    </script>
+  </body>
+</html>
