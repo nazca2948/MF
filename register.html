@@ -12,7 +12,7 @@
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
                 <div class="logo" style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="logo-icon.png" alt="バクダン解除アイコン" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <img src="logo-icon.png" alt="バクダン介助アイコン" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                     <div>
                         <h1 style="font-family: var(--font-display); font-weight: bold; font-size: clamp(1.8rem, 4vw, 2.2rem); margin: 0;">
                             <a href="index.html" style="text-decoration: none; color: inherit;">
@@ -304,7 +304,7 @@
 
     <script src="shared.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // ログインチェック
             if (!isUserLoggedIn()) {
                 showNotification('ログインが必要です', 'error');
@@ -312,12 +312,17 @@
                 return;
             }
 
-            // 別端末からのログインの場合（ログイン済みだが未登録）はスキップボタンを表示
-            // 初回登録済みならダッシュボードへ
-            if (isUserRegistered()) {
-                showNotification('すでに会員登録が完了しています', 'info');
-                setTimeout(() => redirectToDashboard(), 1000);
-                return;
+            // 登録済みかどうかはSupabaseのみで判断
+            try {
+                const registered = await getGameState('user_registered');
+                if (registered === 'true') {
+                    showNotification('すでに会員登録が完了しています', 'info');
+                    setTimeout(() => redirectToDashboard(), 1000);
+                    return;
+                }
+            } catch (e) {
+                console.warn('user_registered確認失敗:', e);
+                // 失敗時はそのまま登録フォームを表示
             }
 
             // 別端末フラグ：localStorageにセッションはあるがregisteredがない場合

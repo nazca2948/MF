@@ -26,7 +26,6 @@ async function supabaseGet(table, params = "") {
 //  ※ログイン情報はサーバーに送らない設計
 // ===================================================
 const SESSION_KEY = "detonation_user_session";
-const REGISTERED_KEY = "detonation_user_registered";
 
 function setUserSession(userData) {
   localStorage.setItem(
@@ -52,22 +51,8 @@ function isUserLoggedIn() {
   return s && s.username;
 }
 
-function setUserRegistered(val = true) {
-  localStorage.setItem(REGISTERED_KEY, JSON.stringify(val));
-}
-
-function isUserRegistered() {
-  try {
-    const item = localStorage.getItem(REGISTERED_KEY);
-    return item ? JSON.parse(item) : false;
-  } catch {
-    return false;
-  }
-}
-
 function clearUserSession() {
   localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(REGISTERED_KEY);
 }
 
 // ===================================================
@@ -75,7 +60,7 @@ function clearUserSession() {
 // ===================================================
 function authenticateUser(username, password) {
   const validCredentials = {
-    bh00121: "b9QVqpdp",
+    bh00121: "b9QVqvdB",
   };
   return validCredentials[username] === password;
 }
@@ -218,15 +203,6 @@ function requireAuth() {
   return true;
 }
 
-function requireRegistration() {
-  if (!isUserRegistered()) {
-    alert("会員登録が必要です。");
-    redirectToRegister();
-    return false;
-  }
-  return true;
-}
-
 // ===================================================
 //  UI ユーティリティ
 // ===================================================
@@ -290,7 +266,6 @@ document.addEventListener("DOMContentLoaded", initializePage);
 async function debugInfo() {
   console.log("=== DETONATION DEBUG INFO ===");
   console.log("User Session:", getUserSession());
-  console.log("User Registered:", isUserRegistered());
   console.log("Bomb Data:", await getBombData());
   console.log("=============================");
 }
@@ -303,8 +278,6 @@ window.detonationSystem = {
   setUserSession,
   getUserSession,
   isUserLoggedIn,
-  setUserRegistered,
-  isUserRegistered,
   clearUserSession,
   getBombData,
   getGameState,
@@ -319,7 +292,6 @@ window.detonationSystem = {
   redirectToBombStatus,
   getURLParameter,
   requireAuth,
-  requireRegistration,
   showNotification,
   validateForm,
   debugInfo,
