@@ -206,7 +206,7 @@ p {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, var(--background-dark) 0%, var(--secondary-color) 100%);
+    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%), url('hero-bg.png') center center / cover no-repeat;
     color: var(--text-light);
     padding: var(--spacing-xl) 0;
     text-align: center;
