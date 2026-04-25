@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ダッシュボード | バクダン介助 - 株式会社DETONATION</title>
+    <title>ダッシュボード | バクダン解除 - 株式会社DETONATION</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -111,8 +111,8 @@
             countdownIntervals.forEach(clearInterval);
             countdownIntervals = [];
 
-            // active と defused のみ表示（inactiveは完全に隠す）
-            const activeBombs = bombList.filter(b => b.status === 'active' || b.status === 'defused');
+            // active のみ表示（inactive・defused は非表示）
+            const activeBombs = bombList.filter(b => b.status === 'active');
             displayBombs(activeBombs, 'active-bombs', true);
 
             document.getElementById('loading').style.display = 'none';

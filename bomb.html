@@ -676,7 +676,7 @@
           <div id="defuse-step1">
             <p>&gt; 解除対象デバイスのシリアルを入力してください。</p>
             <div class="defuse-field" style="margin-bottom:0.6rem;">
-              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造場所 (2文字) :</label>
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造場所:</label>
               <input
                 type="text"
                 id="serial-location"
@@ -687,7 +687,7 @@
               />
             </div>
             <div class="defuse-field" style="margin-bottom:0.6rem;">
-              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造ID (3桁) :</label>
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造ID:</label>
               <input
                 type="text"
                 id="serial-id"
@@ -699,18 +699,17 @@
               />
             </div>
             <div class="defuse-field" style="margin-bottom:0.6rem;">
-              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 通し記号 (ひらがな1文字) :</label>
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 通し記号:</label>
               <input
                 type="text"
                 id="serial-symbol"
                 maxlength="1"
-                placeholder="あ"
                 autocomplete="off"
                 style="width:3rem;text-align:center;"
               />
             </div>
             <div class="defuse-field" style="margin-bottom:1rem;">
-              <label style="font-size:0.75rem;letter-spacing:0.05em;">// シリアルコード (1〜4桁) :</label>
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// シリアルコード:</label>
               <input
                 type="text"
                 id="serial-code"
@@ -1346,24 +1345,36 @@
             document.getElementById("status-dot").className =
               "status-dot inactive";
 
-            // Supabaseのstep2フラグをリセット
+            // Supabase: bombs.status を defused に更新 ＋ step2フラグをリセット
             try {
-              await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
-                method: "POST",
-                headers: {
-                  apikey: window._SUPABASE_KEY,
-                  Authorization: `Bearer ${window._SUPABASE_KEY}`,
-                  "Content-Type": "application/json",
-                  Prefer: "resolution=merge-duplicates,return=minimal",
-                },
-                body: JSON.stringify({
-                  key: `defuse_step2_${currentBomb.id}`,
-                  value: "false",
-                  updated_at: new Date().toISOString(),
+              await Promise.all([
+                fetch(`${window._SUPABASE_URL}/rest/v1/bombs?id=eq.${currentBomb.id}`, {
+                  method: "PATCH",
+                  headers: {
+                    apikey: window._SUPABASE_KEY,
+                    Authorization: `Bearer ${window._SUPABASE_KEY}`,
+                    "Content-Type": "application/json",
+                    Prefer: "return=minimal",
+                  },
+                  body: JSON.stringify({ status: "defused" }),
                 }),
-              });
+                fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
+                  method: "POST",
+                  headers: {
+                    apikey: window._SUPABASE_KEY,
+                    Authorization: `Bearer ${window._SUPABASE_KEY}`,
+                    "Content-Type": "application/json",
+                    Prefer: "resolution=merge-duplicates,return=minimal",
+                  },
+                  body: JSON.stringify({
+                    key: `defuse_step2_${currentBomb.id}`,
+                    value: "false",
+                    updated_at: new Date().toISOString(),
+                  }),
+                }),
+              ]);
             } catch (e) {
-              console.warn("フラグリセット失敗:", e);
+              console.warn("Supabase更新失敗:", e);
             }
 
             // 3秒後にダッシュボードへ
