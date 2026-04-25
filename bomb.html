@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>爆弾ステータス | バクダン介助 - 株式会社DETONATION</title>
+    <title>爆弾ステータス | バクダン解除 - 株式会社DETONATION</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -675,13 +675,50 @@
         <div class="defuse-body">
           <div id="defuse-step1">
             <p>&gt; 解除対象デバイスのシリアルを入力してください。</p>
-            <div class="defuse-field">
-              <label>// DEVICE SERIAL :</label>
+            <div class="defuse-field" style="margin-bottom:0.6rem;">
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造場所 (2文字) :</label>
               <input
                 type="text"
-                id="defuse-serial"
-                placeholder="________________"
+                id="serial-location"
+                maxlength="2"
+                placeholder="__"
                 autocomplete="off"
+                style="width:4rem;text-align:center;"
+              />
+            </div>
+            <div class="defuse-field" style="margin-bottom:0.6rem;">
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 製造ID (3桁) :</label>
+              <input
+                type="text"
+                id="serial-id"
+                maxlength="3"
+                placeholder="___"
+                autocomplete="off"
+                inputmode="numeric"
+                style="width:5rem;text-align:center;"
+              />
+            </div>
+            <div class="defuse-field" style="margin-bottom:0.6rem;">
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// 通し記号 (ひらがな1文字) :</label>
+              <input
+                type="text"
+                id="serial-symbol"
+                maxlength="1"
+                placeholder="あ"
+                autocomplete="off"
+                style="width:3rem;text-align:center;"
+              />
+            </div>
+            <div class="defuse-field" style="margin-bottom:1rem;">
+              <label style="font-size:0.75rem;letter-spacing:0.05em;">// シリアルコード (1〜4桁) :</label>
+              <input
+                type="text"
+                id="serial-code"
+                maxlength="4"
+                placeholder="____"
+                autocomplete="off"
+                inputmode="numeric"
+                style="width:5rem;text-align:right;"
               />
             </div>
             <div class="defuse-actions">
@@ -1201,7 +1238,7 @@
           document.getElementById("defuse-step-label").textContent = "STEP 2/2";
           document.getElementById("defuse-code").focus();
         } else {
-          document.getElementById("defuse-serial").focus();
+          document.getElementById("serial-location").focus();
         }
       }
 
@@ -1219,18 +1256,41 @@
         document.getElementById("defuse-step2").style.display = "none";
         document.getElementById("defuse-success").style.display = "none";
         document.getElementById("defuse-step-label").textContent = "STEP 1/2";
-        document.getElementById("defuse-serial").value = "";
+        ["serial-location","serial-id","serial-symbol","serial-code"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
         if (document.getElementById("defuse-code"))
           document.getElementById("defuse-code").value = "";
       }
 
-      // シリアル検証
+      // シリアル検証（4フィールド全一致）
       document
         .getElementById("defuse-serial-submit")
         .addEventListener("click", async function () {
-          const serial = document.getElementById("defuse-serial").value.trim();
-          if (!currentBomb || !serial) return;
-          if (serial === currentBomb.id) {
+          if (!currentBomb) return;
+
+          const loc    = document.getElementById("serial-location").value.trim();
+          const sid    = document.getElementById("serial-id").value.trim();
+          const symbol = document.getElementById("serial-symbol").value.trim();
+          const code   = document.getElementById("serial-code").value.trim();
+
+          if (!loc || !sid || !symbol || !code) {
+            showNotification("すべての項目を入力してください", "error");
+            return;
+          }
+
+          // decryptionKey は "製造場所|製造ID|通し記号|シリアルコード" 形式
+          const parts = (currentBomb.decryptionKey || "").split("|");
+          const [correctLoc, correctId, correctSymbol, correctCode] = parts;
+
+          const isMatch =
+            loc    === (correctLoc    || "").trim() &&
+            sid    === (correctId     || "").trim() &&
+            symbol === (correctSymbol || "").trim() &&
+            code   === (correctCode   || "").trim();
+
+          if (isMatch) {
             // Supabaseにシリアル突破フラグを書き込み → 全端末に即反映
             try {
               await fetch(`${window._SUPABASE_URL}/rest/v1/game_state`, {
@@ -1324,12 +1384,12 @@
           document.getElementById("defuse-step1").style.display = "block";
           document.getElementById("defuse-step-label").textContent = "STEP 1/2";
         });
-      document
-        .getElementById("defuse-serial")
-        .addEventListener("keydown", (e) => {
+      ["serial-location","serial-id","serial-symbol","serial-code"].forEach(id => {
+        document.getElementById(id).addEventListener("keydown", (e) => {
           if (e.key === "Enter")
             document.getElementById("defuse-serial-submit").click();
         });
+      });
       document
         .getElementById("defuse-code")
         .addEventListener("keydown", (e) => {
