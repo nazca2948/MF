@@ -196,7 +196,7 @@
                   font-family: var(--font-display);
                 "
               >
-                最短即日であなたの「壊したい」を実現！<br><span
+                最短即日であなたの「壊したい」を実現！<br /><span
                   style="color: var(--accent-color)"
                   >面倒な作業から現場への設置まで、スマホ一つでプロに完全丸投げ。</span
                 >
@@ -228,21 +228,6 @@
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- メディア実績セクション -->
-      <section class="media-section">
-        <div class="container">
-          <h3>多くのメディアに取り上げて頂いています！</h3>
-          <div class="media-logos">
-            <div class="media-item">爆弾工学新聞</div>
-            <div class="media-item">デトネーション・ウィークリー</div>
-            <div class="media-item">火薬技術ジャーナル</div>
-            <div class="media-item">爆発物専門誌BOOM</div>
-            <div class="media-item">セキュリティ・トゥデイ</div>
-            <div class="media-item">TNT タイムズ</div>
           </div>
         </div>
       </section>
@@ -393,13 +378,23 @@
           <p class="status-note">※ログイン後、詳細情報をご確認いただけます</p>
 
           <!-- ローディング -->
-          <div id="index-bombs-loading" style="text-align:center;opacity:0.5;font-family:var(--font-mono);font-size:0.9rem;">
+          <div
+            id="index-bombs-loading"
+            style="
+              text-align: center;
+              opacity: 0.5;
+              font-family: var(--font-mono);
+              font-size: 0.9rem;
+            "
+          >
             読み込み中...
           </div>
 
           <!-- 爆弾カード（JSで生成） -->
-          <div id="index-bombs-container" style="display:none; max-width:900px; margin:0 auto;">
-          </div>
+          <div
+            id="index-bombs-container"
+            style="display: none; max-width: 900px; margin: 0 auto"
+          ></div>
         </div>
       </section>
 
@@ -617,18 +612,25 @@
       async function loadIndexBombs() {
         try {
           const allBombs = await getBombData();
-          const bombs = Object.values(allBombs).filter(b => b.status === 'active' || b.status === 'defused');
-          document.getElementById('index-bombs-loading').style.display = 'none';
+          const bombs = Object.values(allBombs).filter(
+            (b) => b.status === "active" || b.status === "defused",
+          );
+          document.getElementById("index-bombs-loading").style.display = "none";
           if (bombs.length === 0) {
-            document.getElementById('index-bombs-loading').textContent = '現在アクティブな爆弾はありません';
-            document.getElementById('index-bombs-loading').style.display = 'block';
+            document.getElementById("index-bombs-loading").textContent =
+              "現在アクティブな爆弾はありません";
+            document.getElementById("index-bombs-loading").style.display =
+              "block";
             return;
           }
-          const container = document.getElementById('index-bombs-container');
-          container.style.display = 'grid';
-          container.style.gridTemplateColumns = bombs.length > 1 ? '1fr 1fr' : '1fr';
-          container.style.gap = '2rem';
-          container.innerHTML = bombs.map(b => `
+          const container = document.getElementById("index-bombs-container");
+          container.style.display = "grid";
+          container.style.gridTemplateColumns =
+            bombs.length > 1 ? "1fr 1fr" : "1fr";
+          container.style.gap = "2rem";
+          container.innerHTML = bombs
+            .map(
+              (b) => `
             <div style="background:rgba(255,255,255,0.1);padding:2rem;border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,0.2);backdrop-filter:blur(10px);">
               <h2 style="color:var(--accent-color);font-size:2.5rem;margin-bottom:1rem;font-family:var(--font-display);">${b.name || b.id}</h2>
               <div style="font-family:var(--font-mono);font-size:1rem;line-height:2;opacity:0.9;margin-bottom:1.5rem;">
@@ -641,12 +643,18 @@
                 詳細ステータスを確認（要ログイン）
               </button>
             </div>
-          `).join('');
-          bombs.forEach(b => {
-            if (b.status === 'active' && b.endTime) startCountdown('index-timer-' + b.id, b.endTime);
-            else { const el = document.getElementById('index-timer-' + b.id); if(el) el.textContent = 'DEFUSED'; }
+          `,
+            )
+            .join("");
+          bombs.forEach((b) => {
+            if (b.status === "active" && b.endTime)
+              startCountdown("index-timer-" + b.id, b.endTime);
+            else {
+              const el = document.getElementById("index-timer-" + b.id);
+              if (el) el.textContent = "DEFUSED";
+            }
           });
-        } catch(e) {
+        } catch (e) {
           console.error(e);
         }
       }
