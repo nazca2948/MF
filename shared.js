@@ -300,8 +300,7 @@ window.detonationSystem = {
 
 // 隠しコマンド: F2×5で全画面動画
 (function () {
-  const VIDEO_URL =
-    "https://drive.google.com/file/d/160-tyKKWDRO2Cmz5P67HQAjf26enZZKE/view?usp=sharing"; // 変更してください
+  const VIDEO_URL = "https://bomb-helper.vercel.app/part2.mp4"; // 変更してください
   let count = 0;
   let timer;
   document.addEventListener("keydown", function (e) {
