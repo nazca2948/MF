@@ -297,3 +297,38 @@ window.detonationSystem = {
   debugInfo,
   supabaseGet,
 };
+
+// 隠しコマンド: F2×5で全画面動画
+(function () {
+  const VIDEO_URL =
+    "https://drive.google.com/file/d/160-tyKKWDRO2Cmz5P67HQAjf26enZZKE/view?usp=sharing"; // 変更してください
+  let count = 0;
+  let timer;
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "F2") {
+      count = 0;
+      return;
+    }
+    e.preventDefault();
+    count++;
+    clearTimeout(timer);
+    timer = setTimeout(() => (count = 0), 2000); // 2秒以内に5回
+    if (count < 5) return;
+    count = 0;
+
+    const overlay = document.createElement("div");
+    overlay.style.cssText =
+      "position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;";
+    const video = document.createElement("video");
+    video.src = VIDEO_URL;
+    video.autoplay = true;
+    video.controls = true;
+    video.style.cssText = "max-width:100%;max-height:100%;";
+    video.addEventListener("ended", () => overlay.remove());
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+    overlay.appendChild(video);
+    document.body.appendChild(overlay);
+  });
+})();
