@@ -210,7 +210,7 @@
 
         newAccountLink.addEventListener("click", function (e) {
           e.preventDefault();
-          alert("現在新規受付停止中です");
+          alert("現在新規受付停止中です。");
         });
 
         loginForm.addEventListener("submit", function (e) {
@@ -221,7 +221,7 @@
 
           if (!username || !password) {
             showNotification(
-              "ユーザーIDとパスワードを入力してください",
+              "ユーザーIDとパスワードを入力してください。",
               "error",
             );
             return;
@@ -232,7 +232,7 @@
               username: username,
               loginTime: new Date().toISOString(),
             });
-            showNotification("ログインしました", "info");
+            showNotification("ログインしました。", "info");
 
             setTimeout(async () => {
               try {
@@ -246,7 +246,7 @@
             }, 1000);
           } else {
             showNotification(
-              "ユーザーIDまたはパスワードが正しくありません",
+              "ユーザーIDまたはパスワードが正しくありません。",
               "error",
             );
             passwordInput.value = "";
@@ -271,14 +271,10 @@
               if (val === "true") {
                 window.location.href = "forgot.html";
               } else {
-                alert(
-                  "現在このサービスはメンテナンス中です。\nしばらくお待ちください。",
-                );
+                alert("現在メンテナンス中です。");
               }
             } catch {
-              alert(
-                "現在このサービスはメンテナンス中です。\nしばらくお待ちください。",
-              );
+              alert("現在メンテナンス中です。");
             }
           });
 
