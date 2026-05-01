@@ -1,141 +1,289 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ログイン | バクダン介助 - 株式会社DETONATION</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <!-- ヘッダー（index.htmlと同じスタイル） -->
-    <section style="background: var(--background); padding: 2rem 0; border-bottom: 1px solid var(--border-color);">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
-                <div class="logo" style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="logo-icon.png" alt="バクダン介助アイコン" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                    <div>
-                        <h1 style="font-family: var(--font-display); font-weight: bold; font-size: clamp(1.8rem, 4vw, 2.2rem); margin: 0;">
-                            <a href="index.html" style="text-decoration: none; color: inherit;">
-                                <span style="color: #5fb85f;">バクダン</span><span style="color: #4a90a4;">解除</span>
-                            </a>
-                        </h1>
-                        <p class="tagline" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.2rem 0 0 0;">プロフェッショナルサービス</p>
-                    </div>
-                </div>
-                <nav style="display: flex; align-items: center; gap: 2rem;">
-                    <a href="index.html" class="nav-link">トップへ戻る</a>
-                </nav>
+    <section
+      style="
+        background: var(--background);
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--border-color);
+      "
+    >
+      <div class="container">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+          "
+        >
+          <div
+            class="logo"
+            style="display: flex; align-items: center; gap: 1rem"
+          >
+            <img
+              src="logo-icon.png"
+              alt="バクダン介助アイコン"
+              style="
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+              "
+            />
+            <div>
+              <h1
+                style="
+                  font-family: var(--font-display);
+                  font-weight: bold;
+                  font-size: clamp(1.8rem, 4vw, 2.2rem);
+                  margin: 0;
+                "
+              >
+                <a
+                  href="index.html"
+                  style="text-decoration: none; color: inherit"
+                >
+                  <span style="color: #5fb85f">バクダン</span
+                  ><span style="color: #4a90a4">解除</span>
+                </a>
+              </h1>
+              <p
+                class="tagline"
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin: 0.2rem 0 0 0;
+                "
+              >
+                プロフェッショナルサービス
+              </p>
             </div>
+          </div>
+          <nav style="display: flex; align-items: center; gap: 2rem">
+            <a href="index.html" class="nav-link">トップへ戻る</a>
+          </nav>
         </div>
+      </div>
     </section>
 
     <!-- メインコンテンツ -->
-    <main style="min-height: calc(100vh - 100px); background: var(--background-section); padding: 4rem 2rem; display: flex; align-items: center; justify-content: center;">
-        <div style="width: 100%; max-width: 420px;">
-
-            <div style="text-align: center; margin-bottom: 2.5rem;">
-                <h2 style="font-size: var(--font-size-3xl); color: var(--text-primary); margin-bottom: 0.5rem;">会員専用ログイン</h2>
-                <p style="color: var(--text-secondary); font-size: var(--font-size-base);">IDとパスワードを入力してください</p>
-            </div>
-
-            <div style="background: var(--background); border-radius: var(--radius-lg); box-shadow: 0 4px 30px var(--shadow); padding: 2.5rem;">
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="username">ユーザーID</label>
-                        <input type="text" id="username" name="username" required
-                               placeholder="IDを入力してください"
-                               autocomplete="username">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">パスワード</label>
-                        <input type="password" id="password" name="password" required
-                               placeholder="パスワードを入力してください"
-                               autocomplete="current-password">
-                    </div>
-
-                    <button type="submit" class="login-btn" style="width: 100%; padding: 1rem; font-size: var(--font-size-lg); margin-top: 0.5rem; min-height: var(--button-min-size);">
-                        ログイン
-                    </button>
-                </form>
-
-                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                    <a href="javascript:void(0)" id="new-account-link" style="color: var(--primary-color); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500;">
-                        アカウントをお持ちでない方はこちら
-                    </a>
-                    <br>
-                    <a href="forgot.html" style="color: var(--text-secondary); text-decoration: none; font-size: var(--font-size-sm); margin-top: 0.5rem; display: inline-block;">
-                        ID・パスワードを忘れた方はこちら
-                    </a>
-                </div>
-            </div>
-
+    <main
+      style="
+        min-height: calc(100vh - 100px);
+        background: var(--background-section);
+        padding: 4rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="width: 100%; max-width: 420px">
+        <div style="text-align: center; margin-bottom: 2.5rem">
+          <h2
+            style="
+              font-size: var(--font-size-3xl);
+              color: var(--text-primary);
+              margin-bottom: 0.5rem;
+            "
+          >
+            会員専用ログイン
+          </h2>
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: var(--font-size-base);
+            "
+          >
+            IDとパスワードを入力してください
+          </p>
         </div>
+
+        <div
+          style="
+            background: var(--background);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 30px var(--shadow);
+            padding: 2.5rem;
+          "
+        >
+          <form id="login-form">
+            <div class="form-group">
+              <label for="username">ユーザーID</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                placeholder="IDを入力してください"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">パスワード</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                placeholder="パスワードを入力してください"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="login-btn"
+              style="
+                width: 100%;
+                padding: 1rem;
+                font-size: var(--font-size-lg);
+                margin-top: 0.5rem;
+                min-height: var(--button-min-size);
+              "
+            >
+              ログイン
+            </button>
+          </form>
+
+          <div
+            style="
+              text-align: center;
+              margin-top: 1.5rem;
+              padding-top: 1.5rem;
+              border-top: 1px solid var(--border-color);
+            "
+          >
+            <a
+              href="javascript:void(0)"
+              id="new-account-link"
+              style="
+                color: var(--primary-color);
+                text-decoration: none;
+                font-size: var(--font-size-sm);
+                font-weight: 500;
+              "
+            >
+              アカウントをお持ちでない方はこちら
+            </a>
+            <br />
+            <a
+              href="javascript:void(0)"
+              id="forgot-link"
+              style="
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-size: var(--font-size-sm);
+                margin-top: 0.5rem;
+                display: inline-block;
+              "
+            >
+              ID・パスワードを忘れた方はこちら
+            </a>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="shared.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('login-form');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const newAccountLink = document.getElementById('new-account-link');
+      document.addEventListener("DOMContentLoaded", function () {
+        const loginForm = document.getElementById("login-form");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const newAccountLink = document.getElementById("new-account-link");
 
-            // すでにログイン済みならダッシュボードへ
-            if (isUserLoggedIn()) {
-                window.location.href = 'dashboard.html';
-                return;
-            }
+        // すでにログイン済みならダッシュボードへ
+        if (isUserLoggedIn()) {
+          window.location.href = "dashboard.html";
+          return;
+        }
 
-            newAccountLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('現在新規受付停止中です');
-            });
-
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
-
-                if (!username || !password) {
-                    showNotification('ユーザーIDとパスワードを入力してください', 'error');
-                    return;
-                }
-
-                if (authenticateUser(username, password)) {
-                    setUserSession({
-                        username: username,
-                        loginTime: new Date().toISOString()
-                    });
-                    showNotification('ログインしました', 'info');
-
-                    setTimeout(async () => {
-                        try {
-                            const val = await getGameState('user_registered');
-                            window.location.href = val === 'true' ? 'dashboard.html' : 'register.html';
-                        } catch(e) {
-                            // Supabase失敗時はregisterへ（安全側に倒す）
-                            window.location.href = 'register.html';
-                        }
-                    }, 1000);
-                } else {
-                    showNotification('ユーザーIDまたはパスワードが正しくありません', 'error');
-                    passwordInput.value = '';
-                    usernameInput.focus();
-                }
-            });
-
-            [usernameInput, passwordInput].forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        loginForm.dispatchEvent(new Event('submit'));
-                    }
-                });
-            });
-
-            usernameInput.focus();
+        newAccountLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          alert("現在新規受付停止中です");
         });
+
+        loginForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!username || !password) {
+            showNotification(
+              "ユーザーIDとパスワードを入力してください",
+              "error",
+            );
+            return;
+          }
+
+          if (authenticateUser(username, password)) {
+            setUserSession({
+              username: username,
+              loginTime: new Date().toISOString(),
+            });
+            showNotification("ログインしました", "info");
+
+            setTimeout(async () => {
+              try {
+                const val = await getGameState("user_registered");
+                window.location.href =
+                  val === "true" ? "dashboard.html" : "register.html";
+              } catch (e) {
+                // Supabase失敗時はregisterへ（安全側に倒す）
+                window.location.href = "register.html";
+              }
+            }, 1000);
+          } else {
+            showNotification(
+              "ユーザーIDまたはパスワードが正しくありません",
+              "error",
+            );
+            passwordInput.value = "";
+            usernameInput.focus();
+          }
+        });
+
+        [usernameInput, passwordInput].forEach((input) => {
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              loginForm.dispatchEvent(new Event("submit"));
+            }
+          });
+        });
+
+        document
+          .getElementById("forgot-link")
+          .addEventListener("click", async function (e) {
+            e.preventDefault();
+            try {
+              const val = await getGameState("forgot_enabled");
+              if (val === "true") {
+                window.location.href = "forgot.html";
+              } else {
+                alert(
+                  "現在このサービスはメンテナンス中です。\nしばらくお待ちください。",
+                );
+              }
+            } catch {
+              alert(
+                "現在このサービスはメンテナンス中です。\nしばらくお待ちください。",
+              );
+            }
+          });
+
+        usernameInput.focus();
+      });
     </script>
-</body>
+  </body>
 </html>
