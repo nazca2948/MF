@@ -856,7 +856,7 @@
       }
       async function toggleForgot() {
         try {
-          const current = await getGameState("forgot_enabled");
+          const current = gameState["forgot_enabled"] || "false";
           const newVal = current === "true" ? "false" : "true";
           await sbUpsert("game_state", {
             key: "forgot_enabled",
